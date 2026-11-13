@@ -1,0 +1,17 @@
+{
+  "model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.7,
+  "top_p": 1.0,
+  "max_tokens": 1000,
+  "thinking": "disabled",
+  "indices": [900, 901, 902],
+  "trials": 3,
+  "seed": 5660,
+  "n_evaluate_sample": 1,
+  "baseline_width": 5,
+  "modified_width": 1,
+  "call_limit_per_instance": 350,
+  "token_limit_per_instance": 200000,
+  "note": "Small exploratory subset. n_evaluate_sample=1 is shared by both arms to reduce API usage; the author's script uses 3. Do not compare its accuracy directly to the 100-puzzle GPT-4 result."
+}
