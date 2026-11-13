@@ -141,6 +141,7 @@ def main():
 
     heading('7. Debug diary and implementation decisions')
     table(['Issue found in code inspection', 'Resolution / verification'], [
+        ['Colab Python 3.13: standard venv exited with status 1 (user-reported traceback)', 'Use pinned virtualenv with its bundled pip to create or repair the environment; retain the traceback and confirm the workaround in the current Colab runtime.'],
         ['Old SDK: openai==0.27.7 and ChatCompletion.create', 'Replace only src/tot/models.py with a modern OpenAI-compatible DeepSeek transport; keep algorithm and prompts byte-identical. A real connectivity check is required in Colab.'],
         ['Original backend choices and GPT-4 cost formula', 'Use a small harness to pass the configured model; record actual token usage and omit misleading USD estimates.'],
         ['n>1 provider portability', 'Make independent n=1 calls; count physical requests. This changes batching and therefore limits latency comparability.'],
@@ -148,7 +149,7 @@ def main():
         ['Model text passed to SymPy by original evaluator', 'Restrict accepted expressions to safe arithmetic; run the original checker only after grammar validation. Log both results.'],
         ['Interrupted runtimes and stochastic results', 'Save one row after every instance; resume only with the same configuration and retain failures. Report three trial accuracies and sample variance.'],
     ], [6.1*cm, 10.5*cm])
-    paragraph('These are inspected compatibility and evaluation issues, not invented incidents from a completed live run. API error types and partial outputs from actual runs are saved in results.csv and traces/. Any additional blocker should be added to this diary after reviewing those files.')
+    paragraph('The Colab setup failure was reported from an actual runtime; the other compatibility and evaluation issues were identified in code inspection. API error types and partial outputs from actual runs are saved in results.csv and traces/. Any additional blocker should be added to this diary after reviewing those files.')
     heading('8. Conclusions and limits')
     paragraph(f"The deterministic audit recalculated {archive['recomputed_successes']}/{archive['n']} successes from the authors' released outputs. This checks the released evaluation artifact, not independent GPT-4 inference.")
     if complete:

@@ -23,7 +23,7 @@ The author's script uses three value samples. This small experiment uses **one v
 
 1. Upload the provided `FTEC5660_Reproducibility_Colab.ipynb` through File -> Upload notebook.
 2. Run its first cell and upload `FTEC5660-Reproducibility-colab.zip` when prompted.
-3. Run the installation cell. It creates a temporary isolated Python environment in Colab and uses `requirements-colab.txt`, not the old upstream `requirements.txt`. No notebook restart is required.
+3. Run the installation cell. It uses pinned virtualenv 20.35.4 and its bundled pip to create or repair a temporary isolated Python environment, including Colab runtimes where standard venv/ensurepip fails. It installs `requirements-colab.txt`, not the old upstream `requirements.txt`. No notebook restart is required. If using an older notebook, replace its installation cell with the contents of `colab_environment_setup.py`.
 4. In Colab Secrets, enable notebook access to `DEEPSEEK_API_KEY`. Never paste the key into code, chat, GitHub or a recorded video.
 5. Run the preflight and connectivity cells, followed by the main experiment cell.
 6. Inspect `results.csv`, `trial_summary.csv`, `summary.json` and one or more traces. Keep errors; do not rerun only unsuccessful examples to improve the score.
