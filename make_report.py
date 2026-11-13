@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--run-dir', type=Path, default=ROOT / 'experiment_runs/main')
+    parser.add_argument('--run-dir', type=Path, default=ROOT / 'experiment_runs/format_policy_v2')
     parser.add_argument('--name', default='[Name to be completed]')
     parser.add_argument('--student-id', default='[Student ID to be completed]')
     parser.add_argument('--github-url', default='[GitHub URL to be completed]')
@@ -72,10 +72,10 @@ def main():
     paragraph(args.name + ' | ' + args.student_id)
     paragraph(status)
     if not complete:
-        paragraph('This is a working draft. Only the archived-output audit has been measured. Live DeepSeek results and modification effects remain pending; this draft must not be submitted as a completed reproduction.')
+        paragraph('This is a working draft. The archived-output audit and an interrupted preliminary live run are available. The controlled v2 comparison remains pending; this draft must not be submitted as a completed reproduction.')
     heading('1. Project and reproduction target')
     paragraph('I use the authors\' public Tree of Thoughts (ToT) repository. ToT repeatedly proposes intermediate arithmetic steps, asks an LLM to evaluate partial states, and retains candidates for the next breadth-first search layer. It is a multi-step planning/search system rather than a single prompt-response. I reuse its search, task, prompt and dataset files rather than reimplement the method.')
-    paragraph('The paper reports 74% Game of 24 success with GPT-4. The README separately reports 69% for the released 100-task rerun. My target has two parts: recalculate the released-log metric, then run a fresh, explicitly limited DeepSeek subset and measure the effect of reducing beam width. The archive replay verifies evaluation consistency; it does not rerun GPT-4.')
+    paragraph('The paper reports 74% Game of 24 success with GPT-4. The README separately reports 69% for the released 100-task rerun. My target is to recalculate the released-log metric and examine whether the original multi-step search runs with DeepSeek. An initial width experiment exposed an output-format mismatch. The controlled v2 modification therefore adds an output-format system-message policy while keeping search width fixed. The archive replay verifies evaluation consistency; it does not rerun GPT-4.')
     heading('2. Setup and provenance')
     paragraph('Repository: https://github.com/princeton-nlp/tree-of-thought-llm. Pinned upstream commit: 8050e67d0e3a0fddc424d7fa5801538722a4c4cc. SHA-256 checks protect bfs.py, the task, prompts, dataset and archived log. The code records the runtime platform, Python version and pip freeze in the experiment directory.')
     paragraph('The live experiment uses Google Colab CPU and the hosted DeepSeek API; no local model training or GPU is needed. Credentials come from the DEEPSEEK_API_KEY Colab Secret or environment variable and are excluded from saved artifacts. The Python 3.11+ dependency versions are pinned in requirements-colab.txt.')
@@ -90,10 +90,10 @@ def main():
     story.append(PageBreak())
 
     heading('3. Protocol, metrics and controlled modification')
-    paragraph('Both live arms use the same model, prompts, original dataset indices, propose/value/greedy search, temperature, four search stages, token limits and evaluator. The baseline retains five states per layer; the modified configuration retains one. This single main algorithmic change tests a search-quality versus inference-resource trade-off.')
-    paragraph('To keep API use manageable, both arms use one LLM value sample per state. The authors\' shell script uses three. Switching GPT-4 to DeepSeek and reducing the dataset and value-sampling budget are shared setup adaptations, not changes attributed to beam width. Results are not directly comparable to the paper because the underlying LLM and experimental conditions differ.')
-    paragraph('Primary success rate: the fraction of puzzles for which any retained final expression equals exactly 24 and uses each input number exactly once with +, -, * or /. An AST/Fraction checker enforces this grammar without executing model text. The original checker is also run on safe arithmetic, with discrepancies logged. This success-any metric matches the repository\'s aggregation; wider beams return more candidates. Top-1 success is therefore reported as an additional diagnostic.')
-    paragraph('Resource measures are total physical API attempts, provider-reported input/output tokens, retries and wall-clock seconds per puzzle. USD cost is not inferred from old GPT-4 tariffs; cache and time-dependent pricing differ. Error and budget-limited instances remain in denominators as failures. A per-instance cap of 350 attempts or 200,000 already-reported tokens bounds runaway use; one in-flight request may add tokens beyond the soft token threshold.')
+    paragraph('Both v2 arms use the same model, original user-prompt templates, task indices, propose/value/greedy search, temperature, four search stages, evaluator and resource caps. Both retain one state per layer and draw one value sample. The raw baseline sends the original user prompt without a system message. The modified arm adds phase-specific format instructions: at most four plain arithmetic proposal lines, exact lowercase value labels, and a one-line final expression. No generated answer or label is repaired or replaced in Python. This output-contract policy is the sole experimental intervention; its parts are not separately ablated.')
+    paragraph('The original script uses width five and three value samples. Width one, one value sample, a small subset, the hosted model substitution and low resource caps are shared setup adaptations in v2. The preliminary width comparison is not pooled with v2. Results are not directly comparable to the paper because the underlying LLM and experimental conditions differ.')
+    paragraph('Primary success rate: the fraction of puzzles for which a retained final expression equals exactly 24 and uses each input number exactly once with +, -, * or /. An AST/Fraction checker enforces this grammar without executing model text; the original checker also receives safe arithmetic. Width one makes success-any and top-1 identical. Interface measures are the fraction of value responses with a last-line label accepted by the original parser and the fraction of proposal lines matching its expected arithmetic syntax. These measures do not assess mathematical correctness.')
+    paragraph(f"Resource measures are physical API attempts, provider-reported tokens, retries and search wall-clock seconds per puzzle. Each v2 instance has the same cap of {config['call_limit_per_instance']} attempts or {config['token_limit_per_instance']} already-reported tokens. One in-flight request may exceed the soft token threshold. A budget failure counts as unsuccessful, so these rates describe performance under the declared budget, not unconstrained solving ability. USD cost is not estimated from old GPT-4 tariffs.")
     paragraph('Each trial evaluates the same fixed subset. A fresh task object clears the reward cache between instances. Baseline/modified order alternates; the runner resets the upstream module-level gpt partial before each solve. No cross-run response cache is used. Model outputs, search trajectories, source hashes and results are retained. Failed outcomes are not replaced with selected reruns.')
     paragraph('For each arm I compute one accuracy per trial, then report its mean, sample variance and sample standard deviation (ddof=1). I also report pooled top-1 accuracy and per-instance mean resources. With only three selected puzzles, a single trial changes in increments of 33.3 percentage points. Repeated trials do not turn three puzzles into nine independent task examples. This is an exploratory subset, not evidence for benchmark-wide improvement.')
     heading('4. Re-evaluation of the authors\' released outputs')
@@ -113,36 +113,44 @@ def main():
         paragraph('PENDING: no completed live experiment is available. Run reproduce.py in Colab with the configured API key, then regenerate this report. No success rate, token reduction, latency reduction or modification outcome is asserted here.')
     else:
         b, m = summary['baseline'], summary['modified']
-        def pct(x): return f'{100*x:.1f}%'
-        table(['Metric', 'Baseline b=5', 'Modified b=1'], [
+        def pct(x): return f'{100*x:.1f}%' if x is not None else 'N/A'
+        table(['Metric', 'Raw policy, b=1', 'Format contract, b=1'], [
             ['Recorded instances', b['n'], m['n']],
             ['Successes / instances', f"{b['successes']}/{b['n']}", f"{m['successes']}/{m['n']}"],
             ['Trial accuracy mean', pct(b['mean_success_rate']), pct(m['mean_success_rate'])],
             ['Trial accuracy sample variance', f"{b['sample_variance_success_rate']:.6f}", f"{m['sample_variance_success_rate']:.6f}"],
             ['Trial accuracy sample SD', pct(b['sample_sd_success_rate']), pct(m['sample_sd_success_rate'])],
             ['Pooled top-1 success', pct(b['top1_rate']), pct(m['top1_rate'])],
+            ['Value-label compliance', pct(b.get('value_label_compliance')), pct(m.get('value_label_compliance'))],
+            ['Proposal-line syntax compliance', pct(b.get('proposal_line_compliance')), pct(m.get('proposal_line_compliance'))],
             ['Mean attempts / puzzle', f"{b['mean_api_calls']:.1f}", f"{m['mean_api_calls']:.1f}"],
             ['Mean tokens / puzzle', f"{b['mean_tokens']:.0f}", f"{m['mean_tokens']:.0f}"],
             ['Mean seconds / puzzle', f"{b['mean_seconds']:.1f}", f"{m['mean_seconds']:.1f}"],
             ['Error instances (counted as failure)', b['errors'], m['errors']],
         ], [7.8*cm, 4.4*cm, 4.4*cm])
         delta = 100 * (m['mean_success_rate'] - b['mean_success_rate'])
-        paragraph(f'On this fixed subset, changing b=5 to b=1 changed mean success by {delta:+.1f} percentage points. This is a descriptive result under the recorded model and setup, not a statistically established general effect.')
+        paragraph(f'On this fixed subset under equal resource caps, adding the output-format policy changed mean success by {delta:+.1f} percentage points. This is descriptive and does not establish a general reasoning improvement.')
         for label, key in [('API attempts', 'mean_api_calls'), ('tokens', 'mean_tokens'), ('wall-clock time', 'mean_seconds')]:
             if b[key] > 0:
                 change = 100*(m[key]/b[key]-1)
-                paragraph(f'Mean {label} changed by {change:+.1f}% relative to b=5.')
+                paragraph(f'Mean {label} changed by {change:+.1f}% relative to the raw-policy arm.')
         if b['errors'] or m['errors']:
             paragraph('Some instances failed at runtime. Consult results.csv and per-instance traces before attributing an accuracy difference to search quality; failures remain in the reported denominator.')
     heading('6. Comparison with reported numbers')
-    paragraph('The paper\'s 74% and repository rerun\'s 69% use GPT-4 and 100 puzzles. The archive audit addresses the latter number under its existing outputs. Fresh DeepSeek subset rates address a different question: whether the original search pipeline runs under an accessible model and what beam width changes in this setup. A higher subset rate would not establish a better method; a lower rate would not refute the paper.')
+    paragraph('The paper\'s 74% and repository rerun\'s 69% use GPT-4 and 100 puzzles. The archive audit addresses the latter number under its existing outputs. The fresh v2 rates address output-contract compatibility under a common budget. A higher subset rate would not establish a better reasoning method, and a lower rate would not refute the paper. A resource reduction can follow from fewer malformed candidates and shorter labels; this is an interface-policy result rather than an isolated gain in mathematical reasoning.')
     paragraph('The released-log subset is reported only as a descriptive reference. It is not a matched-model baseline and has a different value-sampling budget. Local API latency can vary with server load and ordering; alternating arm order reduces but does not remove this confound.')
     story.append(PageBreak())
 
     heading('7. Debug diary and implementation decisions')
+    diagnosis_path = ROOT / 'preliminary_v1/format_diagnosis.json'
+    if diagnosis_path.exists():
+        diagnosis = json.loads(diagnosis_path.read_text())
+        paragraph(f"The preliminary run saved three completed/failed instances and one interrupted instance. Logs contain {diagnosis['calls']} successful API responses and {diagnosis['prompt_tokens'] + diagnosis['completion_tokens']} reported tokens. Of {diagnosis['value_calls']} value responses, only {diagnosis['recognized_value_labels']} ended with an accepted exact label. The logged proposal responses contained {diagnosis['proposal_lines']} lines, including {diagnosis['blank_lines']} blank lines. Traces show blank or Markdown-only candidates being selected. The b=5 case at index 900 hit its 200,000-token limit; both completed b=1 cases failed to produce a valid final expression. These original records remain in preliminary_v1; the interrupted case has no success score or complete latency measurement. Unreturned requests may have additional provider usage.")
+        paragraph('This diagnosis motivated v2 before its runs began. Width is now fixed and the main intervention is the output-contract policy. The v1 outcomes are not deleted, pooled into v2, or replaced by selective successful retries. The format probe uses 1 2 3 4, outside the evaluation subset, and is not a benchmark result.')
     table(['Issue found in code inspection', 'Resolution / verification'], [
         ['Colab Python 3.13: standard venv exited with status 1 (user-reported traceback)', 'Use pinned virtualenv with its bundled pip to create or repair the environment; retain the traceback and confirm the workaround in the current Colab runtime.'],
-        ['Old SDK: openai==0.27.7 and ChatCompletion.create', 'Replace only src/tot/models.py with a modern OpenAI-compatible DeepSeek transport; keep algorithm and prompts byte-identical. A real connectivity check is required in Colab.'],
+        ['Old SDK: openai==0.27.7 and ChatCompletion.create', 'Use a modern DeepSeek transport. Original search, task and user-prompt files remain byte-identical; the modified arm adds a separately logged system message.'],
+        ['Observed verbose / Markdown responses and unrecognized value labels', 'Preserve the preliminary failure, then compare raw versus format-contract policies at the same width and budget. Run a separate format probe before the main experiment.'],
         ['Original backend choices and GPT-4 cost formula', 'Use a small harness to pass the configured model; record actual token usage and omit misleading USD estimates.'],
         ['n>1 provider portability', 'Make independent n=1 calls; count physical requests. This changes batching and therefore limits latency comparability.'],
         ['Global gpt partial and persistent value cache', 'Reset the function and instantiate a fresh task per measured instance; maintain identical handling in both arms.'],
@@ -153,9 +161,9 @@ def main():
     heading('8. Conclusions and limits')
     paragraph(f"The deterministic audit recalculated {archive['recomputed_successes']}/{archive['n']} successes from the authors' released outputs. This checks the released evaluation artifact, not independent GPT-4 inference.")
     if complete:
-        paragraph('The live table documents this implementation\'s measured outcomes under DeepSeek and the fixed subset. Conclusions about beam width are limited to these tasks, settings and API calls. A broader study should preregister a larger subset, restore three value samples for fidelity, and separate multiple sources of provider and task variation.')
+        paragraph('The live table documents measured outcomes of the output-contract policy on a fixed DeepSeek subset under a common budget. It cannot isolate the separate effects of proposal bounding, label instructions and final-answer formatting. A broader study should preregister more tasks, test the policy parts separately and restore the original search/sample budgets for fidelity.')
     else:
-        paragraph('Fresh agent behavior and the impact of the beam-width modification cannot yet be concluded. The remaining work is to execute the Colab experiment, inspect errors and outputs, regenerate this report, and record the presentation. No pending quantity has been replaced by a guessed result.')
+        paragraph('The preliminary logs establish a portability failure. The effectiveness of the v2 output-contract policy remains unmeasured until the controlled Colab run is complete. No pending quantity has been replaced by a guessed result.')
     paragraph('For future users, preserve the exact prompt/data hashes and raw API logs, check model alias changes, budget physical requests rather than logical n-sample calls, and keep model portability changes separate from the experimental factor.')
     heading('9. Submission links and references')
     paragraph('GitHub: ' + args.github_url)
@@ -192,7 +200,7 @@ Show reproduction_config.json. State the model substitution, fixed indices, thre
 Show archive_audit.json. Explain the {archive['recomputed_successes']}/{archive['n']} recomputed result. These are authors' saved outputs; replay is not fresh inference.
 
 ## 5:30-8:30 - Your live run and modification
-Show results.csv, trial_summary.csv and summary.json. Explain b=5 -> b=1 as the sole main algorithmic change. Report the actual means, sample variances, top-1 metric, errors, calls, tokens and time. Do not claim a measured effect while live results are pending.
+Show the preliminary failure logs, then the separate v2 results.csv, trial_summary.csv and summary.json. Explain raw -> format-contract system messages as the sole policy intervention; both widths are one and both budgets are equal. Report actual success means/variances, format compliance, budget failures, calls, tokens and time. Do not claim a measured v2 effect while results are pending.
 
 ## 8:30-10:00 - What worked or did not
 Open one successful trace and one failure if available. Explain the old SDK adapter, safe evaluator, cache isolation and error handling. Show your changes in Git commits.

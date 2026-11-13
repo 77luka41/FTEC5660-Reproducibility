@@ -30,6 +30,23 @@ def run_with_progress(python, root, output):
     root, output = Path(root), Path(output)
     command = [str(python), '-u', 'reproduce.py', '--output', str(output), '--resume']
     print('启动实验；每 15 秒显示一次进度。', flush=True)
+    stream_process(command, root, lambda: progress_snapshot(root, output))
+
+
+def run_probe_with_progress(python, root, output):
+    root, output = Path(root), Path(output)
+    probe_dir = output / 'format_probe'
+    command = [str(python), '-u', 'probe_output_policy.py', '--output', str(probe_dir)]
+    def snapshot():
+        log = probe_dir / 'api_calls.jsonl'
+        count = len(log.read_text().splitlines()) if log.exists() else 0
+        return f'格式检查仍在运行；已有 {count} 条 API 返回记录。'
+    print('启动三阶段格式检查；每 15 秒显示一次进度。', flush=True)
+    stream_process(command, root, snapshot)
+
+
+def stream_process(command, root, snapshot):
+    """Print from the notebook process so Colab displays incremental output."""
     process = subprocess.Popen(command, cwd=root, stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT, text=True, bufsize=1)
     messages = queue.Queue()
@@ -47,7 +64,7 @@ def run_with_progress(python, root, output):
             try:
                 line = messages.get(timeout=15)
             except queue.Empty:
-                print(progress_snapshot(root, output), flush=True)
+                print(snapshot(), flush=True)
                 continue
             if line is None:
                 break

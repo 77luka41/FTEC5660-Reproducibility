@@ -1,4 +1,5 @@
 {
+  "experiment": "format_policy_v2",
   "model": "deepseek-flash",
   "base_url": "https://api.deepseek.com",
   "temperature": 0.7,
@@ -9,9 +10,11 @@
   "trials": 3,
   "seed": 5660,
   "n_evaluate_sample": 1,
-  "baseline_width": 5,
+  "baseline_width": 1,
   "modified_width": 1,
-  "call_limit_per_instance": 350,
-  "token_limit_per_instance": 200000,
-  "note": "Small exploratory subset. n_evaluate_sample=1 is shared by both arms to reduce API usage; the author's script uses 3. Do not compare its accuracy directly to the 100-puzzle GPT-4 result."
+  "baseline_policy": "raw",
+  "modified_policy": "format_contract",
+  "call_limit_per_instance": 24,
+  "token_limit_per_instance": 16000,
+  "note": "New v2 run, separate from preliminary_v1. The sole factor is adding phase-specific output-format system messages, including at most four proposal lines. Both arms use width 1, one value sample, a 24-attempt cap and 16000 reported tokens. V2 is conditional on these resource limits; budget failures remain in the denominator. It is not directly comparable to the GPT-4 benchmark or the earlier width experiment."
 }

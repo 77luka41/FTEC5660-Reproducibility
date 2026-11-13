@@ -14,15 +14,23 @@ from openai import APIConnectionError, APIStatusError, OpenAI, RateLimitError
 completion_tokens = prompt_tokens = api_calls = retry_calls = 0
 _client = None
 _log_path = None
-_call_limit = 350
-_token_limit = 200000
+_call_limit = 24
+_token_limit = 16000
+_output_policy = 'raw'
+
+
+def set_output_policy(name):
+    global _output_policy
+    if name not in ('raw', 'format_contract'):
+        raise ValueError('Unknown output policy: ' + name)
+    _output_policy = name
 
 
 class BudgetExceeded(RuntimeError):
     """Stop an instance instead of allowing unbounded API expenditure."""
 
 
-def reset_usage(log_path=None, call_limit=350, token_limit=200000):
+def reset_usage(log_path=None, call_limit=24, token_limit=16000):
     global completion_tokens, prompt_tokens, api_calls, retry_calls
     global _log_path, _call_limit, _token_limit
     completion_tokens = prompt_tokens = api_calls = retry_calls = 0
@@ -52,6 +60,10 @@ def _get_client():
 def chatgpt(messages, model=None, temperature=0.7, max_tokens=1000, n=1, stop=None):
     global completion_tokens, prompt_tokens, api_calls, retry_calls
     model = model or os.getenv('DEEPSEEK_MODEL', 'deepseek-flash')
+    messages = [dict(message) for message in messages]
+    if _output_policy == 'format_contract':
+        from .format_policy import format_instruction
+        messages.insert(0, {'role': 'system', 'content': format_instruction(messages)})
     outputs = []
     # Independent draws replace the old SDK's batched n parameter.
     for sample in range(n):
@@ -85,6 +97,7 @@ def chatgpt(messages, model=None, temperature=0.7, max_tokens=1000, n=1, stop=No
             completion_tokens += out_tokens
             text = response.choices[0].message.content or ''
             _append({'event': 'completion', 'sample': sample, 'attempt': attempt + 1,
+                     'output_policy': _output_policy,
                      'created': response.created,
                      'requested_model': model, 'resolved_model': response.model,
                      'response_id': response.id,

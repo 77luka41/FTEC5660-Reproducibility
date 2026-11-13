@@ -1,4 +1,4 @@
-"""Run the authors' Game24 search, audit released logs, and compare beam widths.
+"""Run the authors' Game24 search and compare raw versus constrained output.
 
 No synthetic/model-mocked result is used as an experiment measurement.
 """
@@ -13,6 +13,7 @@ import json
 import os
 import platform
 import random
+import re
 import statistics
 import subprocess
 import sys
@@ -140,10 +141,39 @@ def validate_config(config):
         raise ValueError('Use at least three trials for the main stochastic experiment')
     if not config['indices'] or len(config['indices']) != len(set(config['indices'])):
         raise ValueError('Provide a nonempty list of unique dataset indices')
-    if config['baseline_width'] != 5 or config['modified_width'] != 1:
-        raise ValueError('The predeclared main change is beam width 5 -> 1')
+    if config.get('experiment') != 'format_policy_v2':
+        raise ValueError('Use the v2 format-policy configuration; v1 is retained as a preliminary run')
+    if config['baseline_width'] != 1 or config['modified_width'] != 1:
+        raise ValueError('Keep beam width fixed at 1 in both v2 arms')
+    if config['baseline_policy'] != 'raw' or config['modified_policy'] != 'format_contract':
+        raise ValueError('The sole v2 factor is the output-format system-message policy')
     if config['top_p'] != 1.0 or config['max_tokens'] != 1000 or config['thinking'] != 'disabled':
         raise ValueError('Transport is fixed to top_p=1, max_tokens=1000, thinking disabled')
+
+
+def format_metrics(log_path):
+    counts = dict(value_calls=0, recognized_value_labels=0,
+                  proposal_lines=0, canonical_proposal_lines=0)
+    if not Path(log_path).exists():
+        return counts
+    number = r'-?\d+(?:\.\d+)?(?:/\d+)?'
+    grammar = re.compile(rf'{number} [\+\-\*/] {number} = {number} \(left: {number}(?: {number})*\)')
+    for line in Path(log_path).read_text().splitlines():
+        record = json.loads(line)
+        if record['event'] != 'completion':
+            continue
+        text = next(m['content'] for m in reversed(record['messages']) if m['role'] == 'user')
+        response = record['output']
+        if text.rstrip().endswith('Possible next steps:'):
+            lines = response.split('\n')
+            counts['proposal_lines'] += len(lines)
+            counts['canonical_proposal_lines'] += sum(bool(grammar.fullmatch(s)) for s in lines)
+        elif text.startswith('Evaluate if given numbers') or ('give a judgement' in text and 'Judge:' in text):
+            counts['value_calls'] += 1
+            allowed = ['sure', 'likely', 'impossible'] if text.startswith('Evaluate if given numbers') else ['sure', 'impossible']
+            # This measures exactly what the unmodified upstream parser accepts.
+            counts['recognized_value_labels'] += response.split('\n')[-1] in allowed
+    return counts
 
 
 def statistics_for(rows, config):
@@ -175,6 +205,14 @@ def statistics_for(rows, config):
             'mean_api_calls': statistics.mean(r['api_calls'] for r in group),
             'mean_tokens': statistics.mean(r['total_tokens'] for r in group),
             'errors': sum(r['status'] != 'completed' for r in group)}
+        values = sum(r.get('value_calls', 0) for r in group)
+        labels = sum(r.get('recognized_value_labels', 0) for r in group)
+        lines = sum(r.get('proposal_lines', 0) for r in group)
+        canonical = sum(r.get('canonical_proposal_lines', 0) for r in group)
+        summary[arm].update(value_calls=values, recognized_value_labels=labels,
+            value_label_compliance=labels / values if values else None,
+            proposal_lines=lines, canonical_proposal_lines=canonical,
+            proposal_line_compliance=canonical / lines if lines else None)
     expected = len(config['indices']) * config['trials'] * 2
     summary['complete'] = len(rows) == expected
     summary['expected_instances'] = expected
@@ -186,7 +224,7 @@ def statistics_for(rows, config):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=Path, default=ROOT / 'reproduction_config.json')
-    parser.add_argument('--output', type=Path, default=ROOT / 'experiment_runs/main')
+    parser.add_argument('--output', type=Path, default=ROOT / 'experiment_runs/format_policy_v2')
     parser.add_argument('--preflight', action='store_true')
     parser.add_argument('--resume', action='store_true')
     args = parser.parse_args()
@@ -202,6 +240,12 @@ def main():
         return
     if not os.getenv('DEEPSEEK_API_KEY'):
         raise RuntimeError('DEEPSEEK_API_KEY is missing; configure Colab Secrets first')
+    probe_path = output_dir / 'format_probe/probe_result.json'
+    if not probe_path.exists():
+        raise RuntimeError('Run probe_output_policy.py first; no main API calls were made.')
+    probe = json.loads(probe_path.read_text())
+    if not probe.get('passed') or probe.get('config') != config or probe.get('policy_sha256') != sha256(ROOT / 'src/tot/format_policy.py'):
+        raise RuntimeError('The format probe must pass for this configuration and policy before the main experiment.')
     os.environ['DEEPSEEK_BASE_URL'] = config['base_url']
     from tot import models
     from tot.methods import bfs
@@ -209,18 +253,22 @@ def main():
     import numpy as np
     result_path = output_dir / 'results.jsonl'
     rows = []
-    if result_path.exists():
+    metadata_path = output_dir / 'metadata.json'
+    if metadata_path.exists():
         if not args.resume:
             raise RuntimeError('Results already exist. Use --resume or a new output directory.')
-        metadata = json.loads((output_dir / 'metadata.json').read_text())
+        metadata = json.loads(metadata_path.read_text())
         if metadata['config'] != config:
             raise RuntimeError('Cannot resume with a different experimental configuration')
-        rows = [json.loads(s) for s in result_path.read_text().splitlines() if s.strip()]
+        current_hashes = {p: sha256(ROOT / p) for p in metadata['harness_sha256']}
+        if current_hashes != metadata['harness_sha256']:
+            raise RuntimeError('Cannot resume after changing harness code; retain this run unchanged.')
+        rows = [json.loads(s) for s in result_path.read_text().splitlines() if s.strip()] if result_path.exists() else []
     else:
         metadata = {'started_utc': datetime.now(timezone.utc).isoformat(),
             'upstream_repo': 'https://github.com/princeton-nlp/tree-of-thought-llm',
             'upstream_commit': UPSTREAM, 'config': config, 'source_sha256': source_hashes,
-            'harness_sha256': {p: sha256(ROOT / p) for p in ['reproduce.py', 'src/tot/models.py', 'requirements-colab.txt']},
+            'harness_sha256': {p: sha256(ROOT / p) for p in ['reproduce.py', 'src/tot/models.py', 'src/tot/format_policy.py', 'requirements-colab.txt']},
             'python': sys.version, 'platform': platform.platform(),
             'seed_note': 'Seeds control Python/NumPy only. The provider does not guarantee deterministic decoding; no server seed is sent.',
             'comparability': 'Model, subset and evaluation sampling differ from the paper; these live results are not directly comparable.',
@@ -229,6 +277,10 @@ def main():
         freeze = subprocess.run([sys.executable, '-m', 'pip', 'freeze'], capture_output=True, text=True, check=True)
         (output_dir / 'environment.txt').write_text(freeze.stdout)
     seen = {(r['trial'], r['idx'], r['arm']) for r in rows}
+    saved_names = {f"{r['arm']}_t{r['trial']}_i{r['idx']}" for r in rows}
+    interrupted = [p.parent.name for p in (output_dir / 'traces').glob('*/api_calls.jsonl') if p.parent.name not in saved_names]
+    if interrupted:
+        raise RuntimeError('Unfinished instance logs found: ' + ', '.join(interrupted) + '. Preserve and inspect them before any restart; automatic replacement calls are disabled.')
     for trial in range(config['trials']):
         for idx in config['indices']:
             # Alternate arm order to reduce systematic warm-cache/time bias.
@@ -245,6 +297,8 @@ def main():
                 run_dir = output_dir / 'traces' / f'{arm}_t{trial}_i{idx}'
                 run_dir.mkdir(parents=True, exist_ok=True)
                 models.reset_usage(run_dir / 'api_calls.jsonl', config['call_limit_per_instance'], config['token_limit_per_instance'])
+                policy = config['baseline_policy'] if arm == 'baseline' else config['modified_policy']
+                models.set_output_policy(policy)
                 # Upstream solve mutates a module global; reset it between solves.
                 bfs.gpt = models.gpt
                 search_args = argparse.Namespace(backend=config['model'], temperature=config['temperature'],
@@ -252,7 +306,7 @@ def main():
                     method_evaluate='value', method_select='greedy', n_generate_sample=1,
                     n_evaluate_sample=config['n_evaluate_sample'], n_select_sample=width)
                 start = time.perf_counter()
-                print(f'Running {arm}, trial {trial + 1}, index {idx}, width {width}', flush=True)
+                print(f'Running {arm}, trial {trial + 1}, index {idx}, policy {policy}, width {width}', flush=True)
                 outputs, trace, error_type = [], {}, ''
                 status = 'completed'
                 try:
@@ -269,10 +323,11 @@ def main():
                 elapsed = time.perf_counter() - start
                 evaluation = check_outputs(task, idx, outputs)
                 row = {'arm': arm, 'trial': trial, 'idx': idx, 'puzzle': task.get_input(idx),
-                    'width': width, 'status': status, 'error_type': error_type,
+                    'width': width, 'output_policy': policy, 'status': status, 'error_type': error_type,
                     'success_any': evaluation['success_any'], 'success_top1': evaluation['success_top1'],
                     'upstream_success_any': evaluation['upstream_success_any'],
                     'seconds': elapsed, **models.gpt_usage()}
+                row.update(format_metrics(run_dir / 'api_calls.jsonl'))
                 save_json(run_dir / 'trajectory.json', {'row': row, 'outputs': outputs, 'evaluation': evaluation, 'trace': trace})
                 with result_path.open('a', encoding='utf-8') as f:
                     f.write(json.dumps(row, ensure_ascii=False) + '\n')

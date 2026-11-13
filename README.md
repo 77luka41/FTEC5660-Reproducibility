@@ -11,13 +11,13 @@ The runnable experiment and report generator are prepared. The distributed prefl
 - This is a self-selected project, allowed by section 1 of the assignment.
 - Reuse the original Game24 breadth-first search, prompts, CSV and task checker. Source hashes are verified before execution.
 - Paper: 74% on 100 puzzles with GPT-4; the authors' README describes a released rerun at 69%. The offline audit rechecks that rerun; it is not fresh inference.
-- Main live comparison: same DeepSeek model and tasks, **beam width 5 versus 1**.
+- Main live comparison (v2): same DeepSeek model, tasks, width and budgets; **raw output versus phase-specific output-format system messages**.
 
 ## Scope and comparability
 
 Default: original dataset indices 900, 901 and 902, three trials each, two configurations: 18 measured puzzle runs. Temperature 0.7, maximum output 1000 tokens, thinking disabled, top_p submitted as 1.0 (effective behavior follows the provider). The API model name is `deepseek-flash`; the resolved model name is recorded per response.
 
-The author's script uses three value samples. This small experiment uses **one value sample in both arms** to limit cost. Model substitution, subset size and value-sampling budget are common setup adaptations. The only main experimental factor is beam width. Do not present the resulting subset accuracy as directly comparable to the paper's 74% or the repository's 69%.
+The author's script uses three value samples. This small experiment uses **one value sample in both arms** to limit cost. Model substitution, subset size and value-sampling budget are common setup adaptations. Both arms use width one and a common per-instance cap of 24 physical API attempts or 16,000 already-reported tokens (one in-flight response can overshoot the soft token threshold). The only main experimental factor is the output-format system-message policy. It combines proposal bounding (at most four operation lines), exact value labels and final-answer formatting; these parts are not separately ablated. Do not present the resulting subset accuracy as directly comparable to the paper's 74% or the repository's 69%.
 
 ## Run in Google Colab (CPU is sufficient)
 
@@ -25,7 +25,7 @@ The author's script uses three value samples. This small experiment uses **one v
 2. Run its first cell and upload `FTEC5660-Reproducibility-colab.zip` when prompted.
 3. Run the installation cell. It uses pinned virtualenv 20.35.4 and its bundled pip to create or repair a temporary isolated Python environment, including Colab runtimes where standard venv/ensurepip fails. It installs `requirements-colab.txt`, not the old upstream `requirements.txt`. No notebook restart is required. If using an older notebook, replace its installation cell with the contents of `colab_environment_setup.py`.
 4. In Colab Secrets, enable notebook access to `DEEPSEEK_API_KEY`. Never paste the key into code, chat, GitHub or a recorded video.
-5. Run the preflight and connectivity cells, followed by the main experiment cell.
+5. Run the offline preflight and separate three-call format probe (on 1 2 3 4, outside the evaluation subset). Start the main experiment only if the probe passes. A passed probe checks interface formatting, not solver accuracy.
 6. Inspect `results.csv`, `trial_summary.csv`, `summary.json` and one or more traces. Keep errors; do not rerun only unsuccessful examples to improve the score.
 7. Fill name, student ID and submission links in the notebook, then generate the report and download the artifacts.
 
@@ -39,14 +39,15 @@ Use Python 3.11 or newer:
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements-colab.txt
-python reproduce.py --preflight --output experiment_runs/main
+python reproduce.py --preflight --output experiment_runs/format_policy_v2
 ```
 
 Set `DEEPSEEK_API_KEY` using your environment or a password-style prompt, not a command that saves its value in shell history. Then:
 
 ```bash
-python reproduce.py --output experiment_runs/main --resume
-python make_report.py --run-dir experiment_runs/main --name "YOUR NAME" --student-id "YOUR ID"
+python probe_output_policy.py --output experiment_runs/format_policy_v2/format_probe
+python reproduce.py --output experiment_runs/format_policy_v2 --resume
+python make_report.py --run-dir experiment_runs/format_policy_v2 --name "YOUR NAME" --student-id "YOUR ID"
 ```
 
 The harness loads `src/` directly; no package installation of the old project is necessary. Record the actual environment in `environment.txt`. Installing the legacy `requirements.txt` would reintroduce the old OpenAI SDK.
@@ -55,20 +56,23 @@ The harness loads `src/` directly; no package installation of the old project is
 
 ### Compatibility and measurement (shared by both arms)
 
-- `src/tot/models.py`: modern OpenAI SDK, DeepSeek endpoint, bounded transient retries, one physical request per sample, raw-output/usage logging, and per-instance call/token caps. No original search or prompt changes.
+- `src/tot/models.py`: modern OpenAI SDK, DeepSeek endpoint, bounded transient retries, one physical request per sample, raw-output/usage logging, and per-instance call/token caps. Original search and user-prompt files remain byte-identical. The modified arm adds the separately logged system-message policy from format_policy.py.
 - `reproduce.py`: fixed subset, three trials, fresh reward cache per instance, source checksums, alternating arm order, incremental outputs and deterministic evaluation.
 - The original `solve()` overwrites a module-global function with a partial. The harness restores it before each solve rather than changing `bfs.py`.
-- Strict arithmetic is checked with AST and exact fractions. The original SymPy checker only receives safe arithmetic; both checker results are logged. This shared evaluation restriction is disclosed, not attributed to beam width.
+- Strict arithmetic is checked with AST and exact fractions. The original SymPy checker only receives safe arithmetic; both checker results are logged. This shared evaluation restriction is disclosed, shared by both output policies.
 - `make_report.py`: generates a report from existing measurements and a presentation outline. Pending results stay pending.
 
 ### Isolated experiment
 
-`n_select_sample`: **5 -> 1**. No model, prompt, dataset, sample-count or scoring change occurs between these two configurations. The runner constructs both from `reproduction_config.json`; raw trajectories show the selected states at each stage.
+`output_policy`: **raw -> format_contract**. Both arms retain one state per layer and use identical original user prompts, model settings, indices, evaluation and resource caps. Only the modified arm adds the phase-specific system messages in `src/tot/format_policy.py`. Model text is not repaired, replaced or assigned a synthetic score. The runner constructs both arms from `reproduction_config.json`; logs include the actual system/user messages.
+
+The interrupted v1 pilot compared widths five and one. Its real logs are preserved in `preliminary_v1/` (three saved rows, plus one interrupted instance). Markdown/prose proposals were split into many candidates, while most value outputs did not end in a recognized label. This diagnosis motivated v2 before its trials started. V1 is not pooled with v2 and its outcomes are not overwritten. See `preliminary_v1/DIAGNOSIS.md`.
 
 ## Metrics and interpretation
 
-- **Success-any:** at least one final retained expression uses the four input numbers exactly once and equals 24 with +, -, *, /. This follows the authors' success-any aggregation; wider beams have more final candidates.
+- **Success-any:** at least one final retained expression uses the four input numbers exactly once and equals 24 with +, -, *, /. Both v2 widths are one, so success-any and top-1 coincide.
 - **Top-1:** validity of the first retained final candidate, reported separately.
+- **Format compliance:** fraction of value responses whose last line is a recognized label, and fraction of raw proposal lines matching canonical operation syntax. These metrics do not assess arithmetic correctness.
 - **Resources:** physical API attempts, retries, input/output tokens and search wall-clock time per puzzle. No inaccurate GPT-4 dollar-cost formula is reused.
 - **Repeated runs:** one accuracy per trial, then mean, sample variance and sample SD. Three trials over three fixed puzzles remain only three distinct task examples.
 - **Failures:** runtime/budget failures count as unsuccessful in the denominator. There are no replacement successes or model-generated judges for final arithmetic correctness.
@@ -77,7 +81,7 @@ The harness loads `src/` directly; no package installation of the old project is
 ## Files produced
 
 ```text
-experiment_runs/main/
+experiment_runs/format_policy_v2/
   metadata.json             # configuration, code/data provenance, environment
   environment.txt           # actual pip freeze
   archive_audit.csv/json     # re-evaluation of author outputs, explicitly labeled
@@ -92,7 +96,7 @@ experiment_runs/main/
   submission_status.json     # remaining identity/link information
 ```
 
-`--resume` skips already recorded instances only when the configuration matches. It preserves failed rows and does not repeat them. If you decide to conduct a new experiment, use a new output directory and report the reason rather than selectively replacing outcomes.
+`--resume` skips already recorded instances only when the configuration matches. It preserves failed rows and does not repeat them. Unfinished API logs without a saved row cause a stop before any new main requests; preserve and inspect those records rather than silently restarting a stochastic instance. Changed harness code also prevents a resume. If you decide to conduct a new experiment, use a new output directory and report the reason rather than selectively replacing outcomes.
 
 ## GitHub submission and reviewable commits
 
