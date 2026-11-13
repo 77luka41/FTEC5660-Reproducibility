@@ -1,0 +1,4 @@
+arm,trial,idx,puzzle,width,status,error_type,success_any,success_top1,upstream_success_any,seconds,completion_tokens,prompt_tokens,total_tokens,api_calls,retry_calls,cost
+baseline,0,900,4 5 6 10,5,error,BudgetExceeded,0,0,0,621.8543887420001,104587,95758,200345,278,0,
+modified,0,900,4 5 6 10,1,completed,,0,0,0,193.8202087489999,29309,33716,63025,100,0,
+modified,0,901,1 2 4 7,1,completed,,0,0,0,262.5457826339998,38631,48028,86659,140,0,

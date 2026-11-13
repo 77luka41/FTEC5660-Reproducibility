@@ -1,0 +1,10 @@
+{
+  "kind": "archived_output_re_evaluation_not_fresh_inference",
+  "n": 100,
+  "author_stored_successes": 69,
+  "recomputed_successes": 69,
+  "strict_successes": 69,
+  "stored_vs_recomputed_disagreements": 0,
+  "subset_n": 3,
+  "subset_strict_successes": 2
+}

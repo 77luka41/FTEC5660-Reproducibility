@@ -1,0 +1,10 @@
+{
+  "calls": 748,
+  "prompt_tokens": 251819,
+  "completion_tokens": 242280,
+  "value_calls": 718,
+  "recognized_value_labels": 139,
+  "proposal_calls": 30,
+  "blank_lines": 331,
+  "proposal_lines": 1563
+}

@@ -1,0 +1,3 @@
+trial,arm,n,success_rate,top1_rate,mean_seconds,mean_api_calls,mean_tokens,errors
+0,baseline,1,0,0,621.8543887420001,278,200345,1
+0,modified,2,0,0,228.18299569149985,120,74842,0

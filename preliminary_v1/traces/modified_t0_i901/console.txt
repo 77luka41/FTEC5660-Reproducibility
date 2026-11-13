@@ -1,0 +1,1 @@
+functools.partial(<function gpt at 0x7933ed708d60>, model='deepseek-flash', temperature=0.7)

@@ -1,0 +1,30 @@
+{
+  "baseline": {
+    "n": 1,
+    "successes": 0,
+    "mean_success_rate": 0,
+    "sample_variance_success_rate": null,
+    "sample_sd_success_rate": null,
+    "top1_rate": 0,
+    "mean_seconds": 621.8543887420001,
+    "mean_api_calls": 278,
+    "mean_tokens": 200345,
+    "errors": 1
+  },
+  "modified": {
+    "n": 2,
+    "successes": 0,
+    "mean_success_rate": 0,
+    "sample_variance_success_rate": null,
+    "sample_sd_success_rate": null,
+    "top1_rate": 0,
+    "mean_seconds": 228.18299569149985,
+    "mean_api_calls": 120,
+    "mean_tokens": 74842,
+    "errors": 0
+  },
+  "complete": false,
+  "expected_instances": 18,
+  "measured_instances": 3,
+  "metric": "A puzzle succeeds if at least one retained final expression uses the four numbers exactly once and equals 24 using + - * /."
+}
