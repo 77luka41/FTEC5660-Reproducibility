@@ -6,6 +6,8 @@ The Colab v2 experiment completed all 18 instances on 14 November 2026. Both arm
 
 ## Measured v2 results
 
+**V3 follow-up is prepared, not yet measured.** See [V3_EXPERIMENT_ZH.md](V3_EXPERIMENT_ZH.md) and `v3_config.json`: five previously unrun puzzles, three trials, equal shared setup; compare LLM state values with a declared exhaustive exact-arithmetic reachability tool. Both arms still require model-generated actions and final expressions. The tool is an oracle for this small domain, so any gain measures a hybrid system, not unaided LLM reasoning. V3 has a separate output directory and a real end-to-end probe. The existing report and table below describe V2 only. No V3 accuracy is asserted before inference.
+
 | Metric | Raw policy | Format-contract policy |
 |---|---:|---:|
 | Puzzle successes | 0/9 | 0/9 |

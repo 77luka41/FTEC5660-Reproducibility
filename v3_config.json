@@ -1,0 +1,20 @@
+{
+  "experiment": "tool_evaluator_v3",
+  "model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.7,
+  "top_p": 1.0,
+  "max_tokens": 1000,
+  "thinking": "disabled",
+  "indices": [903, 904, 905, 906, 907],
+  "trials": 3,
+  "seed": 5660,
+  "beam_width": 3,
+  "max_proposals_per_parent": 8,
+  "n_evaluate_sample": 1,
+  "baseline_evaluator": "llm",
+  "modified_evaluator": "exact_reachability_tool",
+  "call_limit_per_instance": 80,
+  "token_limit_per_instance": 60000,
+  "note": "Fixed five consecutive previously unrun indices before v3 inference. Both arms share width three, bounded validated proposals, original user templates, reasoning-allowed value formatting, terminal handling and resource caps. The only between-arm change is LLM value evaluation versus a declared exhaustive exact-arithmetic reachability tool. The tool returns only reachability, not an expression, but is an oracle for this small domain. Results measure a hybrid tool-assisted system, not stronger unaided LLM reasoning. V1/v2 remain separate; all failures stay in the denominator."
+}
