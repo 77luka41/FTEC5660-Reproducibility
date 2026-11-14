@@ -1,0 +1,130 @@
+{
+  "row": {
+    "arm": "modified",
+    "trial": 1,
+    "idx": 900,
+    "puzzle": "4 5 6 10",
+    "width": 1,
+    "output_policy": "format_contract",
+    "status": "completed",
+    "error_type": "",
+    "success_any": 0,
+    "success_top1": 0,
+    "upstream_success_any": 0,
+    "seconds": 13.725942355999905,
+    "completion_tokens": 216,
+    "prompt_tokens": 6452,
+    "total_tokens": 6668,
+    "api_calls": 17,
+    "retry_calls": 0,
+    "cost": null,
+    "value_calls": 13,
+    "recognized_value_labels": 13,
+    "proposal_lines": 13,
+    "canonical_proposal_lines": 12
+  },
+  "outputs": [
+    "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 / 6 = 1 (left: 1)\nIf fewer than two numbers remain, return no operation.\n"
+  ],
+  "evaluation": {
+    "strict": [
+      {
+        "valid": false,
+        "safe_grammar": false,
+        "expression": "if fewer than two numbers remain, return no operation."
+      }
+    ],
+    "upstream_rewards": [
+      0
+    ],
+    "success_any": 0,
+    "success_top1": 0,
+    "upstream_success_any": 0
+  },
+  "trace": {
+    "steps": [
+      {
+        "step": 0,
+        "x": "4 5 6 10",
+        "ys": [
+          ""
+        ],
+        "new_ys": [
+          "4 + 5 = 9 (left: 6 9 10)\n",
+          "5 - 4 = 1 (left: 1 6 10)\n",
+          "10 - 6 = 4 (left: 4 4 5)\n",
+          "10 / 5 = 2 (left: 2 4 6)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          0.001,
+          1.0
+        ],
+        "select_new_ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n"
+        ]
+      },
+      {
+        "step": 1,
+        "x": "4 5 6 10",
+        "ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n"
+        ],
+        "new_ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n",
+          "10 / 5 = 2 (left: 2 4 6)\n2 * 4 = 8 (left: 6 8)\n",
+          "10 / 5 = 2 (left: 2 4 6)\n4 - 2 = 2 (left: 2 6)\n",
+          "10 / 5 = 2 (left: 2 4 6)\n6 / 2 = 3 (left: 3 4)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n"
+        ]
+      },
+      {
+        "step": 2,
+        "x": "4 5 6 10",
+        "ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n"
+        ],
+        "new_ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 + 6 = 12 (left: 12)\n",
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 * 6 = 36 (left: 36)\n",
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 - 6 = 0 (left: 0)\n",
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 / 6 = 1 (left: 1)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          0.001,
+          20.0
+        ],
+        "select_new_ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 / 6 = 1 (left: 1)\n"
+        ]
+      },
+      {
+        "step": 3,
+        "x": "4 5 6 10",
+        "ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 / 6 = 1 (left: 1)\n"
+        ],
+        "new_ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 / 6 = 1 (left: 1)\nIf fewer than two numbers remain, return no operation.\n"
+        ],
+        "values": [
+          0
+        ],
+        "select_new_ys": [
+          "10 / 5 = 2 (left: 2 4 6)\n2 + 4 = 6 (left: 6 6)\n6 / 6 = 1 (left: 1)\nIf fewer than two numbers remain, return no operation.\n"
+        ]
+      }
+    ]
+  }
+}

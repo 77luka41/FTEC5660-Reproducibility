@@ -1,0 +1,42 @@
+{
+  "baseline": {
+    "n": 9,
+    "successes": 0,
+    "mean_success_rate": 0,
+    "sample_variance_success_rate": 0,
+    "sample_sd_success_rate": 0.0,
+    "top1_rate": 0,
+    "mean_seconds": 52.829017852666865,
+    "mean_api_calls": 19.333333333333332,
+    "mean_tokens": 16134.777777777777,
+    "errors": 9,
+    "value_calls": 164,
+    "recognized_value_labels": 30,
+    "value_label_compliance": 0.18292682926829268,
+    "proposal_lines": 526,
+    "canonical_proposal_lines": 8,
+    "proposal_line_compliance": 0.015209125475285171
+  },
+  "modified": {
+    "n": 9,
+    "successes": 0,
+    "mean_success_rate": 0,
+    "sample_variance_success_rate": 0,
+    "sample_sd_success_rate": 0.0,
+    "top1_rate": 0,
+    "mean_seconds": 14.86950804588893,
+    "mean_api_calls": 18.11111111111111,
+    "mean_tokens": 7125.222222222223,
+    "errors": 0,
+    "value_calls": 126,
+    "recognized_value_labels": 126,
+    "value_label_compliance": 1.0,
+    "proposal_lines": 127,
+    "canonical_proposal_lines": 120,
+    "proposal_line_compliance": 0.9448818897637795
+  },
+  "complete": true,
+  "expected_instances": 18,
+  "measured_instances": 18,
+  "metric": "A puzzle succeeds if at least one retained final expression uses the four numbers exactly once and equals 24 using + - * /."
+}

@@ -1,0 +1,4 @@
+{
+  "type": "BudgetExceeded",
+  "message": "Per-instance API call/token budget reached; failure is retained."
+}

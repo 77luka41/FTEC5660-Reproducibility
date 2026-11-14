@@ -1,0 +1,35 @@
+{
+  "row": {
+    "arm": "baseline",
+    "trial": 1,
+    "idx": 900,
+    "puzzle": "4 5 6 10",
+    "width": 1,
+    "output_policy": "raw",
+    "status": "error",
+    "error_type": "BudgetExceeded",
+    "success_any": 0,
+    "success_top1": 0,
+    "upstream_success_any": 0,
+    "seconds": 51.6375600020001,
+    "completion_tokens": 9623,
+    "prompt_tokens": 6388,
+    "total_tokens": 16011,
+    "api_calls": 19,
+    "retry_calls": 0,
+    "cost": null,
+    "value_calls": 18,
+    "recognized_value_labels": 2,
+    "proposal_lines": 54,
+    "canonical_proposal_lines": 0
+  },
+  "outputs": [],
+  "evaluation": {
+    "strict": [],
+    "upstream_rewards": [],
+    "success_any": 0,
+    "success_top1": 0,
+    "upstream_success_any": 0
+  },
+  "trace": {}
+}

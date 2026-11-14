@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "proposal_format_ok": true,
+  "value_format_ok": true,
+  "final_format_ok": true,
+  "final_arithmetic_correct": true,
+  "outputs": [
+    "1 + 2 = 3 (left: 3 3 4)\n1 + 3 = 4 (left: 2 4 4)\n1 + 4 = 5 (left: 2 3 5)\n2 + 3 = 5 (left: 1 4 5)",
+    "impossible",
+    "Answer: (1 + 2 + 3) * 4 = 24"
+  ],
+  "format_metrics": {
+    "value_calls": 1,
+    "recognized_value_labels": 1,
+    "proposal_lines": 4,
+    "canonical_proposal_lines": 4
+  },
+  "usage": {
+    "completion_tokens": 87,
+    "prompt_tokens": 1271,
+    "total_tokens": 1358,
+    "api_calls": 3,
+    "retry_calls": 0,
+    "cost": null
+  },
+  "config": {
+    "experiment": "format_policy_v2",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "temperature": 0.7,
+    "top_p": 1.0,
+    "max_tokens": 1000,
+    "thinking": "disabled",
+    "indices": [
+      900,
+      901,
+      902
+    ],
+    "trials": 3,
+    "seed": 5660,
+    "n_evaluate_sample": 1,
+    "baseline_width": 1,
+    "modified_width": 1,
+    "baseline_policy": "raw",
+    "modified_policy": "format_contract",
+    "call_limit_per_instance": 24,
+    "token_limit_per_instance": 16000,
+    "note": "New v2 run, separate from preliminary_v1. The sole factor is adding phase-specific output-format system messages, including at most four proposal lines. Both arms use width 1, one value sample, a 24-attempt cap and 16000 reported tokens. V2 is conditional on these resource limits; budget failures remain in the denominator. It is not directly comparable to the GPT-4 benchmark or the earlier width experiment."
+  },
+  "policy_sha256": "94c9da5ef84ca9bfe334086d8245f5a7e8d9aae4db9fb8372c07117344639c1f",
+  "note": "Separate format probe, not a benchmark result; no ground-truth score is fed to the main solver."
+}

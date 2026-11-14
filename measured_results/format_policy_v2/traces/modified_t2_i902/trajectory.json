@@ -1,0 +1,130 @@
+{
+  "row": {
+    "arm": "modified",
+    "trial": 2,
+    "idx": 902,
+    "puzzle": "2 5 8 11",
+    "width": 1,
+    "output_policy": "format_contract",
+    "status": "completed",
+    "error_type": "",
+    "success_any": 0,
+    "success_top1": 0,
+    "upstream_success_any": 0,
+    "seconds": 14.693190275999768,
+    "completion_tokens": 229,
+    "prompt_tokens": 6459,
+    "total_tokens": 6688,
+    "api_calls": 17,
+    "retry_calls": 0,
+    "cost": null,
+    "value_calls": 13,
+    "recognized_value_labels": 13,
+    "proposal_lines": 13,
+    "canonical_proposal_lines": 12
+  },
+  "outputs": [
+    "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n15 - 11 = 4 (left: 4)\nIf fewer than two numbers remain, return no operation.\n"
+  ],
+  "evaluation": {
+    "strict": [
+      {
+        "valid": false,
+        "safe_grammar": false,
+        "expression": "if fewer than two numbers remain, return no operation."
+      }
+    ],
+    "upstream_rewards": [
+      0
+    ],
+    "success_any": 0,
+    "success_top1": 0,
+    "upstream_success_any": 0
+  },
+  "trace": {
+    "steps": [
+      {
+        "step": 0,
+        "x": "2 5 8 11",
+        "ys": [
+          ""
+        ],
+        "new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n",
+          "5 - 2 = 3 (left: 3 8 11)\n",
+          "11 - 8 = 3 (left: 2 3 5)\n",
+          "8 / 2 = 4 (left: 4 5 11)\n"
+        ],
+        "values": [
+          1.0,
+          0.001,
+          1.0,
+          0.001
+        ],
+        "select_new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n"
+        ]
+      },
+      {
+        "step": 1,
+        "x": "2 5 8 11",
+        "ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n"
+        ],
+        "new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n",
+          "2 + 5 = 7 (left: 7 8 11)\n8 - 7 = 1 (left: 1 11)\n",
+          "2 + 5 = 7 (left: 7 8 11)\n11 - 7 = 4 (left: 4 8)\n",
+          "2 + 5 = 7 (left: 7 8 11)\n11 + 7 = 18 (left: 8 18)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n"
+        ]
+      },
+      {
+        "step": 2,
+        "x": "2 5 8 11",
+        "ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n"
+        ],
+        "new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n11 + 15 = 26 (left: 26)\n",
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n15 - 11 = 4 (left: 4)\n",
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n11 * 15 = 165 (left: 165)\n",
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n15 / 11 = 1.3636363636363635 (left: 1.3636363636363635)\n"
+        ],
+        "values": [
+          0.001,
+          20.0,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n15 - 11 = 4 (left: 4)\n"
+        ]
+      },
+      {
+        "step": 3,
+        "x": "2 5 8 11",
+        "ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n15 - 11 = 4 (left: 4)\n"
+        ],
+        "new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n15 - 11 = 4 (left: 4)\nIf fewer than two numbers remain, return no operation.\n"
+        ],
+        "values": [
+          0
+        ],
+        "select_new_ys": [
+          "2 + 5 = 7 (left: 7 8 11)\n7 + 8 = 15 (left: 11 15)\n15 - 11 = 4 (left: 4)\nIf fewer than two numbers remain, return no operation.\n"
+        ]
+      }
+    ]
+  }
+}
