@@ -1,0 +1,48 @@
+{
+  "kind": "post_hoc_audit_of_saved_inference_no_new_API_calls",
+  "saved_instances": 18,
+  "summary_matches_recomputed": true,
+  "source_and_measured_harness_hashes_match": true,
+  "strict_final_scores_match": true,
+  "format_counters_match": true,
+  "main_api_attempts": 337,
+  "main_reported_tokens": 209340,
+  "main_api_errors": 1,
+  "probe_api_attempts": 3,
+  "probe_reported_tokens": 1358,
+  "failure_types": {
+    "BudgetExceeded": 9
+  },
+  "budget_stops": {
+    "token_threshold": 8,
+    "call_cap": 1
+  },
+  "resolved_model_response_counts": {
+    "deepseek-flash": 336
+  },
+  "modified_terminal_numbers_after_three_operations": [
+    "17",
+    "6",
+    "10",
+    "1",
+    "0",
+    "26",
+    "17",
+    "14",
+    "4"
+  ],
+  "modified_second_layer_all_values_tied": 9,
+  "modified_final_answer_generation_requests": 0,
+  "modified_policy_echo_outputs": 7,
+  "modified_remaining_outputs_with_example_like_operations": 2,
+  "modified_proposal_responses": 36,
+  "modified_proposal_responses_over_four_lines": 1,
+  "rejected_feasible_candidate": {
+    "trace": "modified_t2_i901",
+    "operation": "4 + 7 = 11 (left: 1 2 11)",
+    "llm_value": 0.001,
+    "feasible_continuation": "(11 + 1) * 2 = 24",
+    "original_number_expression": "(4 + 7 + 1) * 2 = 24"
+  },
+  "note": "Formatting syntax is not reasoning correctness. Budget-limited raw failures are not completed unconstrained solves. The probe supplies a completed toy trace and does not test end-to-end search."
+}
