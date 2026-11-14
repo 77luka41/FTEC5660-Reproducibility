@@ -2,7 +2,26 @@
 
 ## Status
 
-The runnable experiment and report generator are prepared. The distributed preflight re-evaluates the authors' archived outputs only. **Before submission, verify a completed live DeepSeek run and an actual Zoom recording.** The latest run's `summary.json` and `submission_status.json` record completion; no simulated model output is presented as an experiment result.
+The Colab v2 experiment completed all 18 instances on 14 November 2026. Both arms scored **0/9**. The format policy improved parseability and returned without budget exceptions, but successful solving was not reproduced under this setup. Real logs, a post-hoc audit and the English report are in `measured_results/format_policy_v2/`. The report is signed Lu Yankai. The repository and actual Zoom recording links are still pending; this is not a completed submission.
+
+## Measured v2 results
+
+| Metric | Raw policy | Format-contract policy |
+|---|---:|---:|
+| Puzzle successes | 0/9 | 0/9 |
+| Trial success-rate mean / sample variance | 0 / 0 | 0 / 0 |
+| Budget failures | 9/9 | 0/9 |
+| Accepted value labels | 30/164 (18.3%) | 126/126 (100%) |
+| Canonical proposal lines | 8/526 (1.5%) | 120/127 (94.5%) |
+| Mean physical API attempts per puzzle | 19.3 | 18.1 |
+| Mean reported tokens per puzzle | 16,135 | 7,125 |
+| Mean elapsed seconds per puzzle | 52.8 | 14.9 |
+
+The main run used 337 physical attempts (including one retried connection error) and 209,340 reported tokens. The separate three-call format probe used 1,358 tokens; the interrupted v1 pilot is also excluded from this table.
+
+All nine raw failures are BudgetExceeded (eight token stops, one attempt stop). All nine modified runs returned without an exception but ended with non-24 states. One rejected candidate leaves `1 2 11`, for which `(11 + 1) * 2 = 24` is valid. At width one, incorrect/tied value judgments and restricted proposals can irreversibly lose viable branches. Final-answer generation was never reached in the main modified runs. See [the report](measured_results/format_policy_v2/report.pdf) and [analysis.json](measured_results/format_policy_v2/analysis.json).
+
+This is an exploratory equal-budget comparison. The policy was designed after the overlapping-task pilot, its components were not separately ablated, and budget-censored raw runs do not measure unconstrained solver accuracy. The results support improved interface compatibility, not improved mathematical reasoning or reproduction of the paper's benchmark success.
 
 ## Project and target
 
@@ -30,6 +49,15 @@ The author's script uses three value samples. This small experiment uses **one v
 7. Fill name, student ID and submission links in the notebook, then generate the report and download the artifacts.
 
 The key is passed to the child Python process through its environment. Prompt/response logs contain only the synthetic math task and model outputs. No `.env` file is required.
+
+## Inspect the measured results without API calls
+
+```bash
+python analyze_results.py --run-dir measured_results/format_policy_v2
+python make_report.py --run-dir measured_results/format_policy_v2 --name "Lu Yankai" --student-id "1155252187"
+```
+
+The audit reads saved records, verifies measured code/data hashes and recomputes scores and aggregates. It does not call DeepSeek or feed any post-hoc arithmetic solution into search. `presentation_script_en.md` is a spoken recording draft, not an actual recording.
 
 ## Local commands (alternative)
 
