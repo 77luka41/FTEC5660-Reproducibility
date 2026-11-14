@@ -1,0 +1,427 @@
+{
+  "kind": "post_hoc_audit_of_saved_v3_outputs_no_new_API_requests",
+  "saved_instances": 30,
+  "source_and_code_hashes_match": true,
+  "strict_and_upstream_final_scores_match": true,
+  "summary_matches_recomputation": true,
+  "tool_value_records_rechecked": 752,
+  "main_api_attempts": 862,
+  "main_reported_tokens": 426859,
+  "main_api_events": {
+    "completion": 862
+  },
+  "resolved_model_response_counts": {
+    "deepseek-flash": 862
+  },
+  "probe_api_attempts": 10,
+  "probe_reported_tokens": 4839,
+  "arms": {
+    "baseline": {
+      "n": 15,
+      "successes": 9,
+      "mean_success_rate": 0.6,
+      "sample_variance_success_rate": 0.28,
+      "sample_sd_success_rate": 0.5291502622129182,
+      "top1_rate": 0.6,
+      "mean_seconds": 46.903538638733515,
+      "mean_api_calls": 48.666666666666664,
+      "mean_tokens": 24576.266666666666,
+      "errors": 0,
+      "trial_rates": [
+        0,
+        1,
+        0.8
+      ]
+    },
+    "modified": {
+      "n": 15,
+      "successes": 11,
+      "mean_success_rate": 0.7333333333333334,
+      "sample_variance_success_rate": 0.013333333333333343,
+      "sample_sd_success_rate": 0.11547005383792519,
+      "top1_rate": 0.7333333333333333,
+      "mean_seconds": 8.82048637813338,
+      "mean_api_calls": 8.8,
+      "mean_tokens": 3881,
+      "errors": 0,
+      "trial_rates": [
+        0.8,
+        0.6,
+        0.8
+      ]
+    }
+  },
+  "by_puzzle": [
+    {
+      "idx": 903,
+      "puzzle": "3 4 4 13",
+      "baseline_successes": 1,
+      "modified_successes": 3,
+      "trials": 3
+    },
+    {
+      "idx": 904,
+      "puzzle": "6 7 8 9",
+      "baseline_successes": 2,
+      "modified_successes": 2,
+      "trials": 3
+    },
+    {
+      "idx": 905,
+      "puzzle": "1 11 11 13",
+      "baseline_successes": 2,
+      "modified_successes": 3,
+      "trials": 3
+    },
+    {
+      "idx": 906,
+      "puzzle": "1 8 10 11",
+      "baseline_successes": 2,
+      "modified_successes": 0,
+      "trials": 3
+    },
+    {
+      "idx": 907,
+      "puzzle": "2 3 6 9",
+      "baseline_successes": 2,
+      "modified_successes": 3,
+      "trials": 3
+    }
+  ],
+  "successful_examples": [
+    {
+      "instance": "modified_t0_i903",
+      "puzzle": "3 4 4 13",
+      "expression": "((3 + 4) + 4) + 13"
+    },
+    {
+      "instance": "modified_t0_i904",
+      "puzzle": "6 7 8 9",
+      "expression": "(8 / (9 - 7)) * 6"
+    },
+    {
+      "instance": "modified_t0_i905",
+      "puzzle": "1 11 11 13",
+      "expression": "(13 - 11) * (1 + 11)"
+    },
+    {
+      "instance": "modified_t0_i907",
+      "puzzle": "2 3 6 9",
+      "expression": "(9 - (2 + 3)) * 6"
+    },
+    {
+      "instance": "baseline_t1_i903",
+      "puzzle": "3 4 4 13",
+      "expression": "((3 + 4) + 4) + 13"
+    },
+    {
+      "instance": "modified_t1_i903",
+      "puzzle": "3 4 4 13",
+      "expression": "((3 + 4) + 4) + 13"
+    },
+    {
+      "instance": "baseline_t1_i904",
+      "puzzle": "6 7 8 9",
+      "expression": "6 * (8 / (9 - 7))"
+    },
+    {
+      "instance": "baseline_t1_i905",
+      "puzzle": "1 11 11 13",
+      "expression": "(1 + 11) * (13 - 11)"
+    },
+    {
+      "instance": "modified_t1_i905",
+      "puzzle": "1 11 11 13",
+      "expression": "(13 - 11) * (1 + 11)"
+    },
+    {
+      "instance": "baseline_t1_i906",
+      "puzzle": "1 8 10 11",
+      "expression": "(11 + 1) * (10 - 8)"
+    },
+    {
+      "instance": "baseline_t1_i907",
+      "puzzle": "2 3 6 9",
+      "expression": "(9 - (2 + 3)) * 6"
+    },
+    {
+      "instance": "modified_t1_i907",
+      "puzzle": "2 3 6 9",
+      "expression": "(9 - (2 + 3)) * 6"
+    },
+    {
+      "instance": "modified_t2_i903",
+      "puzzle": "3 4 4 13",
+      "expression": "((3 + 4) + 4) + 13"
+    },
+    {
+      "instance": "baseline_t2_i904",
+      "puzzle": "6 7 8 9",
+      "expression": "(6 * 8) / (9 - 7)"
+    },
+    {
+      "instance": "modified_t2_i904",
+      "puzzle": "6 7 8 9",
+      "expression": "8 * (6 / (9 - 7))"
+    },
+    {
+      "instance": "modified_t2_i905",
+      "puzzle": "1 11 11 13",
+      "expression": "(1 + 11) * (13 - 11)"
+    },
+    {
+      "instance": "baseline_t2_i905",
+      "puzzle": "1 11 11 13",
+      "expression": "(13 - 11) * (1 + 11)"
+    },
+    {
+      "instance": "baseline_t2_i906",
+      "puzzle": "1 8 10 11",
+      "expression": "(10 - 8) * (11 + 1)"
+    },
+    {
+      "instance": "modified_t2_i907",
+      "puzzle": "2 3 6 9",
+      "expression": "2 * ((6 + 9) - 3)"
+    },
+    {
+      "instance": "baseline_t2_i907",
+      "puzzle": "2 3 6 9",
+      "expression": "(9 - (2 + 3)) * 6"
+    }
+  ],
+  "failed_instances": [
+    {
+      "instance": "baseline_t0_i903",
+      "puzzle": "3 4 4 13",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 4,
+          "selected_viable": 3
+        },
+        {
+          "step": 1,
+          "proposed_viable": 6,
+          "selected_viable": 3
+        },
+        {
+          "step": 2,
+          "proposed_viable": 3,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "baseline_t0_i904",
+      "puzzle": "6 7 8 9",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 1,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 2,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "baseline_t0_i905",
+      "puzzle": "1 11 11 13",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 2,
+          "selected_viable": 2
+        },
+        {
+          "step": 1,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 2,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "baseline_t0_i906",
+      "puzzle": "1 8 10 11",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 1,
+          "selected_viable": 0
+        },
+        {
+          "step": 1,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 2,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "modified_t0_i906",
+      "puzzle": "1 8 10 11",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 1,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 2,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "baseline_t0_i907",
+      "puzzle": "2 3 6 9",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 6,
+          "selected_viable": 3
+        },
+        {
+          "step": 1,
+          "proposed_viable": 3,
+          "selected_viable": 3
+        },
+        {
+          "step": 2,
+          "proposed_viable": 3,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "modified_t1_i904",
+      "puzzle": "6 7 8 9",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 1,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 2,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "modified_t1_i906",
+      "puzzle": "1 8 10 11",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 1,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 2,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "baseline_t2_i903",
+      "puzzle": "3 4 4 13",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 4,
+          "selected_viable": 2
+        },
+        {
+          "step": 1,
+          "proposed_viable": 3,
+          "selected_viable": 3
+        },
+        {
+          "step": 2,
+          "proposed_viable": 4,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    },
+    {
+      "instance": "modified_t2_i906",
+      "puzzle": "1 8 10 11",
+      "status": "completed",
+      "layers": [
+        {
+          "step": 0,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 1,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        },
+        {
+          "step": 2,
+          "proposed_viable": 0,
+          "selected_viable": 0
+        }
+      ],
+      "final_generation_calls": 0
+    }
+  ],
+  "accuracy_difference_percentage_points": 13.333333333333341,
+  "note": "Post-hoc oracle diagnostics are not baseline runtime tool use. V3 is not pooled with V1/V2. Five distinct puzzles repeated three times are not fifteen independent tasks. Any gain is a hybrid-system observation, not unaided LLM reasoning or a GPT-4 benchmark reproduction."
+}

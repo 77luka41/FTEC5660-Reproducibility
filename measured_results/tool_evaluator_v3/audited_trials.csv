@@ -1,0 +1,7 @@
+trial,arm,n,successes,success_rate,top1_rate
+0,baseline,5,0,0,0
+1,baseline,5,5,1,1
+2,baseline,5,4,0.8,0.8
+0,modified,5,4,0.8,0.8
+1,modified,5,3,0.6,0.6
+2,modified,5,4,0.8,0.8
