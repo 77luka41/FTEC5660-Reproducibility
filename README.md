@@ -30,7 +30,9 @@ The exact tool is an oracle for a tiny arithmetic subproblem. This measures a hy
 - [Offline audit](measured_results/tool_evaluator_v3/analysis.json)
 - [English recording script](presentation_script_en.md)
 
-Actual submission repository and Zoom recording links: pending. The script is not a recording.
+Submission repository: https://github.com/77luka41/FTEC5660-Reproducibility
+
+Actual Zoom recording link: pending. The script is not a recording.
 
 ## Source and changes
 

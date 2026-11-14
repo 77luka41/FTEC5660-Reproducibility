@@ -18,8 +18,8 @@
 
 ## 还要完成
 
-1. 创建本次个人作业的 GitHub 仓库，将完整项目文件和分步修改上传，保留原作者 MIT 许可与归属。
-2. 提供真实 GitHub 链接，补进 README 与报告。
+1. 已创建仓库 https://github.com/77luka41/FTEC5660-Reproducibility 。下一步上传完整项目文件和分步修改，保留原作者 MIT 许可与归属。
+2. GitHub 链接已补进 README 与报告。
 3. 用最新 presentation_script_en.md 讲稿录制 Zoom，得到可访问的实际录屏链接。原 V2 讲稿已经另存为历史版本。
 4. 补齐两个链接后更新报告，并按老师入口提交报告、GitHub 和录屏链接。
 

@@ -230,7 +230,7 @@ The toy probe starts from 1 2 3 4 without a completed trace. It solved the case 
 
 ## 12. Submission links and references
 
-GitHub: Pending - actual repository URL has not yet been supplied.
+GitHub: https://github.com/77luka41/FTEC5660-Reproducibility
 
 Presentation: Pending - actual Zoom recording URL has not yet been supplied.
 

@@ -18,7 +18,7 @@ def main():
     parser.add_argument('--run-dir', type=Path, default=ROOT/'measured_results/tool_evaluator_v3')
     parser.add_argument('--name', default='Lu Yankai')
     parser.add_argument('--student-id', default='1155252187')
-    parser.add_argument('--github-url', default='')
+    parser.add_argument('--github-url', default='https://github.com/77luka41/FTEC5660-Reproducibility')
     parser.add_argument('--presentation-url', default='')
     args = parser.parse_args()
     run = args.run_dir.resolve()
@@ -199,7 +199,7 @@ def main():
     status=dict(live_experiment_complete=True,identity_complete=True,
         github_url_complete=args.github_url.startswith('https://github.com/'),
         presentation_link_complete=args.presentation_url.startswith('https://'),
-        note='The measured V3 report is complete; the actual repository and Zoom recording links must be added before submission.')
+        note='The report and measurements are complete; link-completion fields record the remaining submission information.')
     save_json=run/'submission_status.json'
     save_json.write_text(json.dumps(status,indent=2)+'\n')
     print('Created:',pdf)
