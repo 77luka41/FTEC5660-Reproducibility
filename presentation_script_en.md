@@ -1,101 +1,79 @@
-# Zoom presentation script
+# Zoom presentation script — V3 measured results
 
-Presenter: Lu Yankai, 1155252187
+Presenter: Lu Yankai, 1155252187. Rehearse with the file demonstrations and keep the actual recording below 15 minutes. This script is not a recording.
 
-Aim for about 9-12 minutes including the file demonstrations. Rehearse and check the actual recording duration. This document is a script, not a recording. The report still needs the real repository and recording links.
+## 1. Introduction — show the report
 
-## 1. Introduction — show the report title
+Hello, my name is Lu Yankai, and my student ID is 1155252187. I worked on Tree of Thoughts for the Game of 24.
 
-Hello, my name is Lu Yankai, and my student ID is 1155252187. For this reproducibility assignment, I worked with Tree of Thoughts on the Game of 24.
+The task gives four numbers. A valid expression must use each number exactly once and reach twenty-four using basic arithmetic. This allows exact answer checking.
 
-The task gives four numbers. A valid answer must use each number exactly once and reach 24 using addition, subtraction, multiplication or division. This makes it possible to check final answers with arithmetic rather than ask another language model to judge them.
+I reused the authors' search code with DeepSeek. My final experiment compared LLM evaluation with an exact arithmetic tool. The baseline solved nine out of fifteen runs, or sixty percent. The tool group solved eleven out of fifteen, or seventy-three point three percent. I will explain the observed gain and its limits.
 
-My work has two parts. First, I recalculated the result in the authors' released log. Second, I ran their search code with DeepSeek and compared raw outputs with a stricter output-format policy. Both live groups scored zero on my selected subset. I will explain the useful format improvements as well as why successful solving did not reproduce.
+## 2. Original system — show bfs.py
 
-## 2. Original system — show bfs.py and game24.py
+Tree of Thoughts repeatedly proposes, evaluates and selects intermediate states. The model suggests operations, an evaluator scores the resulting states, and breadth-first search retains a limited number of candidates for the next layer. This is a multi-step agentic system.
 
-Tree of Thoughts searches over intermediate reasoning states. In this task, the language model proposes possible arithmetic operations. Another model call evaluates each candidate state. The program keeps the highest-scoring candidates and repeats this process.
+I pinned the public repository and preserved its search loop, task, data and user-template files. Their hashes are checked. The paper reports seventy-four percent with GPT-4; a later released rerun achieved sixty-nine percent. Those are references, not my own live results.
 
-That is why I treat this as an agentic system: it makes several rounds of proposals, evaluations and selections. It is more than one prompt and one answer.
+## 3. Setup and modification — show v3_config.json
 
-I used the public repository at a pinned commit. The search algorithm, original user-prompt templates, task implementation and dataset stayed unchanged. The harness checks their hashes before execution.
+I used Google Colab on CPU and the DeepSeek API, without GPU training. The model request used deepseek-flash, temperature zero point seven, top-p one, one thousand maximum output tokens, and thinking disabled. Settings, raw responses and usage are logged.
 
-The paper reports 74 percent with GPT-4. The repository also releases a later rerun with a 69 percent score. Those are different reported runs, so I keep the two numbers separate.
+Before V3 inference, I fixed five consecutive dataset indices, 903 through 907, which had not been used in my earlier live experiments. Both arms ran the five puzzles three times. That is thirty runs altogether, but only five distinct tasks.
 
-## 3. Setup — show reproduction_config.json
+Both arms shared width three, up to eight validated proposals per parent, one value sample, formatting instructions and budgets. Each puzzle allowed eighty physical API attempts or sixty thousand already-reported tokens. A final response can cross the soft token threshold.
 
-I used Google Colab on CPU and a hosted DeepSeek API. No GPU training was required. The recorded Python version was 3.13.18.
+Only the evaluator changed between arms. The baseline used the authors' LLM value routines. The modified arm exhaustively checked the remaining one to three numbers with exact fractions.
 
-The model request used deepseek-flash, temperature 0.7, top-p 1, a maximum of 1,000 output tokens per request, and thinking disabled. The response model name, settings and token usage are stored in the logs. An API model alias is not a fixed checkpoint.
+This tool is an oracle for a tiny arithmetic domain. It returns reachability and a score, not an operation or an expression. The model still generates the actions and final answer. The experiment measures a hybrid system, not better unaided DeepSeek reasoning.
 
-I selected the original dataset indices 900, 901 and 902. Each group ran all three puzzles in three trials. This gives nine runs per group and eighteen runs altogether, but only three distinct puzzle examples.
+## 4. Shared adapters — show reproduce_v3.py
 
-Both groups kept one candidate at each layer and used one value sample. Both also had the same cap of 24 physical API attempts or 16,000 already-reported tokens per puzzle. One response can cross the token threshold before the next call is stopped.
+Both arms validate model-proposed arithmetic: operands, multiplicity, operation results and remaining numbers. Invalid lines are rejected and logged, not repaired. A branch ends when its only remaining number is not twenty-four. When it reaches twenty-four, the model generates an expression using the original numbers.
 
-These settings differ from the authors' larger search and GPT-4 model. My results are therefore not directly comparable to the paper's benchmark accuracy. The local seed controls Python and NumPy, not guaranteed deterministic generation on the API server.
+Final expressions are checked with AST and exact fractions; safe expressions also go through the authors' checker. The runtime boundary adapters mean the pipeline has changed even though upstream files are byte-identical. These common adaptations are separate from the evaluator comparison.
 
-## 4. Archived-output audit — show archive_audit.json
+## 5. Results — show summary.json and trial_summary.csv
 
-The offline audit examined one hundred outputs that the authors had already generated. It recalculated sixty-nine successes. A strict arithmetic checker also found sixty-nine successes, with no disagreement against the stored task-level results.
+All thirty runs completed without API or budget errors. Baseline accuracy was sixty percent, and tool accuracy was seventy-three point three percent. Top-one accuracy matched success-any in this run.
 
-This reproduces the released-log count. It is not fresh GPT-4 inference. The archived answers were not passed to my live solver.
+The individual trials were important. Baseline accuracies were zero percent, one hundred percent, and eighty percent. Tool accuracies were eighty percent, sixty percent, and eighty percent. The tool arm won the first trial, lost the second and tied the third. The average difference was thirteen point three percentage points, but it was not consistent across trials.
 
-## 5. Preliminary failure and modification — show preliminary_v1/DIAGNOSIS.md
+Sample variances on the zero-to-one accuracy scale were zero point two eight for baseline and about zero point zero one three three for the tool. Five repeated puzzles and three trials do not establish statistical significance or a benchmark-wide improvement.
 
-My first Colab run exposed an interface problem. The original program splits proposal responses by newlines. It expects each line to be an arithmetic operation. However, the model often returned explanations, Markdown and blank lines. The program then treated those lines as candidates.
+Mean reported tokens decreased from about twenty-four thousand six hundred to three thousand nine hundred, a reduction of eighty-four point two percent. Mean API attempts fell from forty-eight point seven to eight point eight. Mean elapsed time fell from forty-six point nine to eight point eight seconds.
 
-The value parser is also strict. It recognizes particular lowercase labels on the last line. In the preliminary logs, only 139 of 718 value responses ended with an accepted label. One puzzle consumed more than 200,000 reported tokens before the budget stopped it.
+The tool's computation was recorded separately. Replacing many LLM evaluations with cheap exact computation helps explain the savings. Main totals were eight hundred sixty-two API attempts and four hundred twenty-six thousand eight hundred fifty-nine reported tokens, excluding the toy probe and earlier experiments.
 
-I preserved this interrupted pilot instead of deleting it. I then defined a separate experiment with a smaller common budget and the same width in both groups.
+## 6. Successful trajectory — show modified_t0_i904
 
-The one main intervention was a phase-specific system-message policy. It asked for at most four plain operation lines, exact value labels and a one-line final expression. These instructions were combined as one policy; I did not separately measure each component. Python did not repair answers or invent scores.
+For six, seven, eight and nine, the model proposed nine minus seven equals two, then eight divided by two equals four, then four multiplied by six equals twenty-four.
 
-I also made a separate three-call format probe on the toy input one, two, three, four. It checked interface formatting, not end-to-end solving. In fact, its value judgment was wrong even though the formatting passed.
+Its final expression was eight divided by open bracket nine minus seven close bracket, multiplied by six. Both checkers accept it. The tool selected reachable states but did not write the operations or answer.
 
-## 6. Main results — show summary.json and trial_summary.csv
+A baseline run also solved another puzzle as open bracket eleven plus one close bracket, multiplied by open bracket ten minus eight close bracket. So the adapted original LLM-evaluated pipeline also demonstrated successful solving.
 
-All eighteen main instances were saved. Both groups solved zero out of nine puzzles. Their three trial accuracies were zero, zero and zero, so both sample variances were zero. This does not mean that the method can never solve another puzzle.
+## 7. Failures — show the per-puzzle table
 
-The raw group hit the resource budget in every run: eight token stops and one attempt stop. The format-policy group returned without a budget exception in all nine runs, but it still did not produce a valid final answer.
+One baseline evaluator treated the single fraction thirteen over eleven as two inputs and added thirteen plus eleven to get twenty-four. It returned sure. The same run rejected the single remaining number twenty-four using calculations from a prompt example. An exact fraction tool avoids those errors.
 
-Accepted value labels increased from 18.3 percent to 100 percent. Canonical proposal lines increased from 1.5 percent to 94.5 percent. Average reported tokens fell from about 16,135 to 7,125, a decrease of 55.8 percent. Average time fell from 52.8 to 14.9 seconds.
+However, all four tool-arm failures had no reachable first-layer candidate. For one, eight, ten and eleven, a solution is open bracket ten minus eight close bracket, multiplied by open bracket eleven plus one close bracket. The failed tool runs did not propose those first actions. A perfect scorer cannot create a missing proposal.
 
-These are measurements under the declared budget. The raw searches were stopped early, and there were no successful solutions in either group, so I cannot describe this as lower cost per solved puzzle.
+That puzzle was worse for the tool group: zero out of three versus two out of three for baseline. Provider randomness means the arms do not receive identical candidates. The aggregate gain must not hide this regression.
 
-The main experiment recorded 337 physical API attempts and 209,340 reported tokens. It included one connection error that was successfully retried. The toy probe and the earlier pilot are excluded from those totals.
+## 8. Earlier work and conclusions — show commits and report
 
-## 7. Failure case — show modified_t2_i901/trajectory.json
+The offline audit recalculated the authors' sixty-nine out of one hundred saved successes. This was archived-output evaluation, not fresh GPT-4 inference. Archived answers were not supplied to the live solver.
 
-Here is one concrete reason that formatting did not solve the whole problem. For the original input one, two, four, seven, a proposed operation was four plus seven equals eleven. This leaves one, two and eleven.
+Earlier failures remain in the repository. A formatting comparison scored zero out of nine in both arms despite improving parseability. Those observations motivated V3, but the datasets and shared setup changed, so earlier results are not pooled with V3.
 
-The model called that state impossible. But eleven plus one, multiplied by two, equals twenty-four. Written with the original inputs, the answer is open bracket four plus seven plus one close bracket, multiplied by two.
+The audit checked code hashes, final arithmetic, usage, statistics and seven hundred fifty-two tool-value records. All raw files and reviewable commits are retained.
 
-The greedy search rejected that candidate. All nine modified runs also had tied values at the second layer, so the original stable selection kept the first listed candidate. With width one, discarded alternatives were not recovered.
+I demonstrated successful multi-step solving with a substituted model and a measured tool modification. I did not recreate GPT-4's original benchmark accuracy. Seventy-three point three percent being close to seventy-four percent does not make the studies equivalent.
 
-After three operations, none of the retained states was twenty-four. In the original wrapper, the final-expression prompt is used only when the remaining number is exactly twenty-four. Therefore that branch was never reached in the main modified runs.
+More tasks and trials, or identical frozen candidate sets, would strengthen the accuracy comparison. My main lesson is to inspect parsing, numerical state interpretation, evaluator quality and proposal coverage, and to preserve both successes and failures. Thank you.
 
-There were also remaining policy failures. Seven final-stage outputs repeated the instruction about having fewer than two numbers. Two others contained operations resembling the prompt examples and used unavailable numbers. One proposal response exceeded the requested four-line limit.
+## Before recording
 
-This case shows that readable labels and valid-looking syntax are not enough. The scores can still be mathematically wrong, and a narrow search can lose the useful branch.
-
-## 8. Conclusions — show the report and repository commits
-
-I reproduced the released-log count of sixty-nine out of one hundred, but I did not reproduce successful solving in the live DeepSeek subset under my chosen settings.
-
-The output policy improved parseability and avoided budget exceptions. It did not improve measured answer accuracy. The final-answer instruction was not exercised in the main search, and the separate effects of proposal bounding and label instructions remain unknown.
-
-The study also has a small task sample. The policy was designed after observing a pilot on overlapping tasks, so it has no independent held-out validation. Latency is affected by server conditions and by early stopping in the raw group.
-
-My main recommendation is to check the program's output interface before spending a large API budget. Record prompts, raw responses, model settings, usage and code versions. Keep failed results and distinguish archived evaluation from fresh inference.
-
-A future study could use additional held-out puzzles, check value-judgment calibration and study each policy component separately. Those are future experiments, not results I measured here.
-
-Thank you.
-
-## Recording checklist
-
-- Use the actual GitHub repository URL when demonstrating commits.
-- Keep the API key and Colab Secrets panel out of the shared screen.
-- Record the presentation in Zoom and check its real duration.
-- Upload the recording to an allowed service and check viewer access.
-- Add the actual recording and repository links to the README and regenerate the report.
+Show the actual personal repository. Keep API keys out of the shared screen. Record in Zoom, check the duration and access, and add the real repository and recording links to the report and README.
