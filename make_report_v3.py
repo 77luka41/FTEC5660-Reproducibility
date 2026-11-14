@@ -19,7 +19,7 @@ def main():
     parser.add_argument('--name', default='Lu Yankai')
     parser.add_argument('--student-id', default='1155252187')
     parser.add_argument('--github-url', default='https://github.com/77luka41/FTEC5660-Reproducibility')
-    parser.add_argument('--presentation-url', default='')
+    parser.add_argument('--presentation-url', default='https://drive.google.com/file/d/1HDtVFF2qXkbQ_NyzAGOJTHHkaG-dW_JR/view?usp=sharing')
     args = parser.parse_args()
     run = args.run_dir.resolve()
     a = json.loads((run/'analysis.json').read_text())
@@ -46,6 +46,10 @@ def main():
         story.append(Paragraph(escape(str(text)),styles[style])); md.append(str(text)+'\n')
     def h(text):
         story.append(Paragraph(escape(text),styles['Heading2'])); md.append('## '+text+'\n')
+    def link(label,url):
+        safe_url=escape(url, {'"':'&quot;'})
+        text=escape(label)+': <link href="'+safe_url+'" color="#155ca8">'+escape(url)+'</link>'
+        story.append(Paragraph(text,styles['ReportSmall']))
     def table(headers,rows,widths):
         data=[[Paragraph(escape(str(x)),styles['ReportSmall']) for x in row] for row in [headers]+rows]
         t=Table(data,colWidths=[x*cm for x in widths],repeatRows=1,hAlign='LEFT')
@@ -184,9 +188,9 @@ def main():
     p('The separate probe solved 1 2 3 4 in 10 API calls. It checks the full search before the main experiment and is excluded from the reported accuracy. The DeepSeek key is read from an environment variable or Colab Secrets.','ReportSmall')
     h('12. Links and references')
     if args.github_url:
-        p('GitHub: '+args.github_url)
+        link('GitHub',args.github_url)
     if args.presentation_url:
-        p('Zoom recording: '+args.presentation_url)
+        link('Zoom recording',args.presentation_url)
     p('Yao et al. (2023). Tree of Thoughts: Deliberate Problem Solving with Large Language Models. https://arxiv.org/abs/2305.10601','ReportSmall')
     p('Authors\' repository, released logs and original/reproduced score note: https://github.com/princeton-nlp/tree-of-thought-llm (pinned commit in section 2).','ReportSmall')
     p('DeepSeek API model / thinking documentation: https://api-docs.deepseek.com/quick_start/pricing/ ; https://api-docs.deepseek.com/guides/thinking_mode/ . Actual requested/resolved names and usage are in the run logs.','ReportSmall')

@@ -4,6 +4,8 @@ Lu Yankai | 1155252187
 
 I used DeepSeek to run Tree of Thoughts on Game of 24. I compared the original LLM evaluator with an exact arithmetic evaluator. In both versions, the LLM generates the calculation steps and final expression.
 
+[Zoom presentation](https://drive.google.com/file/d/1HDtVFF2qXkbQ_NyzAGOJTHHkaG-dW_JR/view?usp=sharing)
+
 ## Main results (V3)
 
 I ran five puzzles (dataset indices 903-907) three times with each evaluator, for 30 runs in total.
