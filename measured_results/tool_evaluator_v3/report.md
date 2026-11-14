@@ -4,8 +4,6 @@ FTEC5660 - Individual Reproducibility Work
 
 Lu Yankai | 1155252187
 
-Measured report: original-code reproduction and an exact-tool evaluator ablation
-
 ## 1. Project, target and main result
 
 I used the authors' Tree of Thoughts (ToT) repository. On Game of 24, an LLM proposes arithmetic steps, an evaluator scores partial states, and breadth-first search retains a limited number of candidates. These repeated actions and selections make this a multi-step agentic system. A final answer must use each of four input numbers exactly once and equal 24 using +, -, * or /.

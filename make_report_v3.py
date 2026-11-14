@@ -61,7 +61,6 @@ def main():
     p('Tree of Thoughts on Game of 24','ReportTitle')
     p('FTEC5660 - Individual Reproducibility Work')
     p(args.name+' | '+args.student_id)
-    p('Measured report: original-code reproduction and an exact-tool evaluator ablation')
     h('1. Project, target and main result')
     p('I used the authors\' Tree of Thoughts (ToT) repository. On Game of 24, an LLM proposes arithmetic steps, an evaluator scores partial states, and breadth-first search retains a limited number of candidates. These repeated actions and selections make this a multi-step agentic system. A final answer must use each of four input numbers exactly once and equal 24 using +, -, * or /.')
     p('The paper reports 74% success with GPT-4; the repository documents a later released rerun at 69%. I first recalculated that released-log count, then ran the authors\' search with DeepSeek on a small subset. Early attempts exposed output-format and value-judgment failures. My final controlled experiment changes only the evaluator: LLM values versus an exact arithmetic reachability tool, with a common adapted setup.')
