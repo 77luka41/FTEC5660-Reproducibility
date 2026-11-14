@@ -1,4 +1,4 @@
-"""Generate the signed V3 report from audited measurements, retaining V1/V2."""
+"""Generate the report from the saved experiment results."""
 import argparse
 import json
 from pathlib import Path
@@ -59,13 +59,13 @@ def main():
     def page(): story.append(PageBreak())
 
     p('Tree of Thoughts on Game of 24','ReportTitle')
-    p('FTEC5660 - Individual Reproducibility Work')
+    p('FTEC5660 - Reproducibility Report')
     p(args.name+' | '+args.student_id)
-    h('1. Project, target and main result')
-    p('I used the authors\' Tree of Thoughts (ToT) repository. On Game of 24, an LLM proposes arithmetic steps, an evaluator scores partial states, and breadth-first search retains a limited number of candidates. These repeated actions and selections make this a multi-step agentic system. A final answer must use each of four input numbers exactly once and equal 24 using +, -, * or /.')
-    p('The paper reports 74% success with GPT-4; the repository documents a later released rerun at 69%. I first recalculated that released-log count, then ran the authors\' search with DeepSeek on a small subset. Early attempts exposed output-format and value-judgment failures. My final controlled experiment changes only the evaluator: LLM values versus an exact arithmetic reachability tool, with a common adapted setup.')
-    p(f"The V3 baseline solved {b['successes']}/{b['n']} runs ({pct(b['mean_success_rate'])}); the tool-assisted arm solved {m['successes']}/{m['n']} ({pct(m['mean_success_rate'])}). This demonstrates correct multi-step solving under the disclosed model and pipeline changes. It does not reproduce the paper's GPT-4 benchmark accuracy. The observed tool-arm gain is descriptive and varies across trials.")
-    h('2. Environment and provenance')
+    h('1. Project and main result')
+    p('I used Tree of Thoughts (ToT) to solve Game of 24. Given four numbers, the goal is to use each number exactly once in an expression that equals 24, using +, -, * and /. The LLM proposes calculation steps, an evaluator scores the resulting states, and breadth-first search keeps a limited number of candidates for the next step.')
+    p('The paper reports 74% success with GPT-4, while the repository reports 69% for a later rerun. I first recalculated the results from that saved rerun, then used DeepSeek to run the search on a small set of puzzles. The early experiments had problems with output formatting and incorrect evaluations. In the final experiment, I compared the LLM evaluator with an exact arithmetic evaluator under the same search settings.')
+    p(f"The LLM evaluator solved {b['successes']}/{b['n']} runs ({pct(b['mean_success_rate'])}), and the exact evaluator solved {m['successes']}/{m['n']} ({pct(m['mean_success_rate'])}). The difference varied across trials. Since I used a different model and a smaller task sample, these results are not directly comparable with the paper's GPT-4 accuracy.")
+    h('2. Experimental setup')
     table(['Item','Recorded setup'],[
         ['Upstream project','https://github.com/princeton-nlp/tree-of-thought-llm'],
         ['Pinned commit','8050e67d0e3a0fddc424d7fa5801538722a4c4cc'],
@@ -74,11 +74,11 @@ def main():
         ['Model / decoding',c['model']+'; temperature 0.7; top_p 1; max_tokens 1000; thinking disabled'],
         ['Dependencies','openai 2.8.1; NumPy 2.2.6; pandas 2.3.3; SymPy 1.14.0; full pip freeze retained'],
     ],[4.0,12.6])
-    p('No GPU training was used. The API key came from the DEEPSEEK_API_KEY Colab Secret and is absent from saved artifacts. All 862 main responses report the model name deepseek-flash; an alias is not an immutable checkpoint. Logs preserve request/response settings, IDs and provider-reported token usage.','ReportSmall')
+    p('I used a Colab CPU runtime and called the DeepSeek API; no model training was needed. The API key was stored in Colab Secrets as DEEPSEEK_API_KEY. All 862 main responses returned the model name deepseek-flash. The logs include the request settings, response IDs and reported token usage. The provider can update this model alias over time.','ReportSmall')
     page()
 
-    h('3. Controlled V3 protocol')
-    p('Before V3 inference, I fixed five consecutive dataset indices: 903, 904, 905, 906 and 907. These puzzles had not been run in the earlier live pilots. Each arm ran all five in three trials: 15 runs per arm and 30 total. Selection was not based on V3 outcomes. The V3 design was informed by failures on indices 900-902, so this is follow-up development on the same benchmark rather than an independent external validation dataset.')
+    h('3. Experiment design')
+    p('Before starting V3, I selected five consecutive dataset indices: 903, 904, 905, 906 and 907. I had not run these puzzles in the earlier experiments. Each evaluator ran all five puzzles three times, giving 15 runs per evaluator and 30 in total. I used the failures on indices 900-902 to develop the V3 setup. Both sets come from the same benchmark.')
     table(['Shared by both arms','Value / handling'],[
         ['Search','Authors\' bfs.solve loop; propose/value/greedy; four stages; width 3'],
         ['Candidate budget','At most 8 valid operation lines per parent; one final model expression per terminal path'],
@@ -87,14 +87,14 @@ def main():
         ['Order / cache / seeds','Alternating arm order; fresh per-puzzle caches; Python/NumPy seed 5660 plus trial/index offsets; no deterministic provider seed'],
         ['Failure handling','All outcomes retained; runtime/budget errors count as failures; interrupted instances cannot be silently replaced'],
     ],[4.3,12.3])
-    p('The single between-arm factor is the evaluator. Baseline calls the authors\' LLM value routines with the shared formatting instructions. Modified calls a deterministic tool that exhaustively combines the 1-3 remaining numbers with exact fractions and returns whether 24 is reachable. Reachable states receive value 20; unreachable states receive 0.001, following the original sure/impossible scale. Duplicate candidates receive zero. Final model expressions are checked exactly in the modified evaluator.')
-    p('The tool is an oracle for these small arithmetic subproblems. It returns a boolean and score, not a next operation or an answer expression. The model still proposes actions and generates the final expression. Its gain measures a hybrid tool-assisted system; it is not evidence that the underlying LLM became a better unaided reasoner. Tool calls, explored nodes and elapsed invocation time are logged separately.')
-    h('4. Common adaptations and accuracy definition')
-    p('Both arms share additional boundary adapters: validate operands, multiplicity, operation results and remaining numbers; reject invalid lines without correcting them; deduplicate and bound candidates; stop a branch with one non-24 number; and request a final expression when the numeric remaining value is 24. Final generation accepts the first returned line. Shared system messages permit short value reasoning and require parseable outputs. These changes, the larger width and new tasks separate V3 from V2 and must not be attributed to the evaluator alone.')
-    p('Upstream search, task, user-template and data files remain byte-identical, but runtime hooks adapt proposal/evaluation boundaries. Hash equality therefore does not mean an unchanged pipeline. Primary success is at least one valid final expression among up to three retained outputs. A separate AST/Fraction checker requires the original four numbers exactly once and exact equality to 24; safe expressions are also checked by the original evaluator. Top-1 success is reported separately. Trial accuracy means, sample variances and sample SDs use the three five-puzzle trials; the variance uses ddof=1.')
+    p('Only the evaluator differs between the two V3 groups. The baseline uses the authors\' LLM value routines. The other version exhaustively checks whether the remaining 1-3 numbers can reach 24, using exact fractions. A reachable state receives 20 and an unreachable state receives 0.001, matching the original sure/impossible scores. Duplicate candidates receive zero. The modified evaluator also checks final expressions exactly.')
+    p('This tool acts as an exact oracle for the small remaining arithmetic problem. It returns a boolean and score. The LLM still generates the calculation steps and final expression. The comparison therefore measures the effect of adding arithmetic computation to the search. Tool calls, explored states and execution time are recorded separately.')
+    h('4. Implementation and evaluation')
+    p('Both versions check the operands, their multiplicities, the calculation result and the remaining numbers. Invalid steps are rejected and logged. Duplicate proposals are removed, and each parent keeps at most eight valid proposals. A branch stops when its only remaining value is not 24. When it reaches 24, the LLM generates a final expression, and the first returned line is used. Both versions receive the same formatting instructions, including permission to give brief reasoning before a value label. These shared changes also distinguish V3 from V2.')
+    p('I kept the original search, task, user-template and dataset files, and connected the additional functions through runtime hooks in reproduce_v3.py. A run succeeds if at least one of its three retained final expressions is valid. An AST parser and exact fractions check that the expression uses the four original numbers exactly once and equals 24. Expressions with valid arithmetic syntax are also passed to the authors\' checker. Top-1 accuracy uses the first final expression only. I calculated the mean, sample variance and sample standard deviation from the three five-puzzle trial accuracies, using ddof=1 for variance.')
     page()
 
-    h('5. Main V3 results')
+    h('5. Results')
     table(['Metric','LLM evaluator','Exact-tool evaluator'],[
         ['Recorded runs',b['n'],m['n']],
         ['Successes / runs',f"{b['successes']}/{b['n']}",f"{m['successes']}/{m['n']}"],
@@ -114,43 +114,43 @@ def main():
         trial_rows.append([t+1,f'{round(br*5)}/5 ({100*br:.0f}%)',f'{round(mr*5)}/5 ({100*mr:.0f}%)',
                            ('0' if delta==0 else f'{delta:+.0f}')+' percentage points'])
     table(['Trial','Baseline successes','Tool successes','Accuracy difference'],trial_rows,[1.5,4.5,4.5,6.1])
-    p(f"The mean difference is +{a['accuracy_difference_percentage_points']:.1f} percentage points, but the modified arm wins only the first trial, loses the second and ties the third. The high baseline variation and just three repeats prevent a stable improvement claim. Repeating five puzzles does not create fifteen independent task examples. No statistical significance or benchmark-wide superiority is claimed.")
-    p(f"Relative to the baseline, the tool arm used {reduction('mean_api_calls'):.1f}% fewer API attempts and {reduction('mean_tokens'):.1f}% fewer reported tokens, with {reduction('mean_seconds'):.1f}% lower mean elapsed search time. Replacing repeated LLM evaluations with cheap exact computation is a direct reason for resource savings. Latency also depends on the provider and on the states visited; candidate sets are not held identical across stochastic runs.")
-    p(f"The main run logged {a['main_api_attempts']} successful API attempts, {a['main_reported_tokens']:,} reported tokens and no API-error events. The modified arm made {m['total_tool_calls']} tool invocations, explored {m['total_tool_nodes']} memoized states and recorded {m['total_tool_seconds']:.4f} seconds of total elapsed tool-invocation time. That localized timer is not a measurement of total machine CPU consumption. No dollar cost is inferred from token counts. The separate toy probe used 10 attempts and 4,839 tokens and is excluded from the table.")
+    p(f"The average increase was {a['accuracy_difference_percentage_points']:.1f} percentage points. The exact evaluator performed better in the first trial, worse in the second and the same in the third. The baseline varied from 0% to 100%. With five distinct puzzles and only three repeats, more runs are needed to determine whether the accuracy gain persists on a larger sample.")
+    p(f"The exact evaluator used {reduction('mean_api_calls'):.1f}% fewer API calls and {reduction('mean_tokens'):.1f}% fewer reported tokens. Mean search time fell by {reduction('mean_seconds'):.1f}%. Much of the saving comes from replacing repeated LLM evaluations with local arithmetic checks. The generated candidates also differed between runs, and provider latency affected the elapsed time.")
+    p(f"The main experiment used {a['main_api_attempts']} API calls and {a['main_reported_tokens']:,} reported tokens, with no API errors. The exact evaluator made {m['total_tool_calls']} tool calls and explored {m['total_tool_nodes']} memoized states. The total time measured around those tool calls was {m['total_tool_seconds']:.4f} seconds; this excludes other work done by the program. Token usage is reported without an estimated monetary cost. The separate probe used 10 API calls and 4,839 tokens and is excluded from the table.")
     page()
 
     h('6. Per-puzzle results and a successful trajectory')
     table(['Dataset index','Original four numbers','LLM successes','Tool successes'],[
         [r['idx'],r['puzzle'],f"{r['baseline_successes']}/3",f"{r['modified_successes']}/3"] for r in a['by_puzzle']
     ],[2.4,5.6,4.3,4.3])
-    p('The per-puzzle table matters: the tool arm is worse on index 906 (0/3 versus 2/3), equal on 904, and better on the other three examples. The aggregate gain should not hide the regression. All 30 runs are included; none was rerun selectively to replace a failure.')
+    p('The exact evaluator performed worse on index 906 (0/3 versus 2/3), equally on index 904, and better on the other three puzzles. These results include all 30 runs, including the failures.')
     h('Successful tool-assisted case: index 904, trial 1')
-    p('Input: 6 7 8 9. In modified_t0_i904, the model proposed the following actions. The tool identified reachable intermediate states; it did not write the operations or final expression.')
+    p('Input: 6 7 8 9. The saved run modified_t0_i904 contains the following model-generated steps. The exact evaluator scored the intermediate states.')
     table(['Stage','Model-generated operation / expression'],[
         [1,'9 - 7 = 2 (left: 2 6 8)'],
         [2,'8 / 2 = 4 (left: 4 6)'],
         [3,'4 * 6 = 24 (left: 24)'],
         ['Final','Answer: (8 / (9 - 7)) * 6 = 24'],
     ],[2.0,14.6])
-    p('This expression uses 6, 7, 8 and 9 exactly once and equals 24. The strict evaluator and the authors\' safe evaluator both mark it correct. The recorded trajectory includes proposals, values, retained states and the final model response, so the success can be traced through the entire search rather than inferred from a summary alone.')
+    p('The expression uses 6, 7, 8 and 9 exactly once and equals 24. Both checkers accept it. The trajectory file records the proposals, their scores, the selected states and the final model response.')
     h('Successful baseline case: index 906, trial 2')
-    p('Baseline_t1_i906 proposed 11 + 1 = 12, then 10 - 8 = 2, and then 12 * 2 = 24. The model generated Answer: (11 + 1) * (10 - 8) = 24. Both checkers accept it. This shows that the adapted original LLM-evaluated pipeline can solve a fresh puzzle without the exact reachability evaluator.')
-    h('What has and has not reproduced')
-    p('The live runs demonstrate the claimed behavior of proposing, evaluating and selecting intermediate arithmetic states to produce valid answers with the authors\' search loop. They are a model-substituted, adapted subset reproduction. They do not independently recreate GPT-4\'s published 74% accuracy. The tool arm\'s 73.3% numerical proximity to 74% is not evidence of equivalence: model, task count, search settings and evaluator differ.')
+    p('In baseline_t1_i906, the model proposed 11 + 1 = 12, then 10 - 8 = 2, and then 12 * 2 = 24. Its final expression was (11 + 1) * (10 - 8) = 24. Both checkers accept it. This run used the LLM evaluator throughout the search.')
+    h('Comparison with the original study')
+    p('The DeepSeek runs reproduced the search behavior: proposing intermediate calculations, evaluating them and selecting a path to a valid answer. I used the authors\' search loop with the model substitution and runtime adaptations described above. The original study used GPT-4 and 100 puzzles. Differences in the model, sample, settings and evaluator prevent a direct accuracy comparison, even though 73.3% is numerically close to the paper\'s 74%.')
     page()
 
     h('7. Remaining failure modes')
     h('LLM values can confuse a scalar fraction with two inputs')
     p('In baseline_t0_i903, a candidate reached the single remaining number 24, but the evaluator returned calculations about 10, 10 and 11 from a prompt example and ended with impossible. The same run evaluated the single remaining fraction 13/11 by adding 13 + 11 = 24 and returned sure. It similarly rated 17/7 and 7/17 sure by treating the numerator and denominator as separate numbers. Search retained these wrong terminal states and lost the valid 24 state.')
-    p('These are observed raw responses, not an assumed explanation for every failure. They illustrate why exact interpretation of numeric states can matter more than a label being syntactically valid. The tool evaluates the Fraction value itself and cannot treat its numerator and denominator as two available operands.')
+    p('The saved responses show that a correctly formatted label can still be based on a misread state. The exact evaluator reads 13/11 as one Fraction value, avoiding this numerator/denominator confusion.')
     h('An exact evaluator cannot recover an unproposed action')
     p('All four modified failures have zero reachable first-layer candidates in their accepted proposal sets: index 906 in all three trials and index 904 in trial 2. The post-hoc audit rechecked their exact tool values. Once the first operation leaves an unreachable state, later operations cannot restore the lost solution.')
-    p('For index 906 (1 8 10 11), a valid solution is (10 - 8) * (11 + 1) = 24. Neither possible first operation for this expression, 10 - 8 or 11 + 1, appeared among the accepted first-layer candidates in the failed modified runs. The oracle correctly scored all available candidates impossible. This solution is a post-hoc diagnostic; it was not fed into inference and does not convert those failures into successes.')
+    p('For index 906 (1 8 10 11), a valid solution is (10 - 8) * (11 + 1) = 24. Neither possible first operation for this expression, 10 - 8 or 11 + 1, appeared in the accepted first-layer candidates of the failed runs with the exact evaluator. All available candidates were correctly scored as impossible. I checked this solution afterwards to investigate the failures; it was not provided to the model during the experiment.')
     p('The baseline did propose 11 + 1 in its successful trial-2 run on the same puzzle. Since provider-side randomness is not controlled, arm runs do not necessarily receive identical proposals. The ablation shares the generation policy and settings, but it does not isolate scoring quality while holding every candidate set fixed.')
-    h('Scope of the tool intervention')
-    p('The exact tool exhaustively solves a tiny remaining subproblem. That is additional domain capability, not a generally available perfect judge for agent tasks. The results support a small hybrid-system modification on Game of 24. They do not imply that this oracle approach scales to natural-language reasoning or that a boolean tool can fix missing proposal coverage.')
-    h('Integrity checks')
-    p(f"The offline audit verified the measured source/harness hashes, all 30 unique arm/trial/index combinations, final scores under both checkers, API attempts and token totals, and aggregate means/variances. It also rechecked {a['tool_value_records_rechecked']} saved exact-tool value records and validated intermediate action multisets. Original uploaded files are preserved byte-for-byte with an import manifest. The audit made no new API requests; its diagnostic tool work is not included in baseline runtime metrics.")
+    h('Limits of the exact evaluator')
+    p('Exhaustive checking is practical here because each state has at most three remaining numbers. It adds a reliable arithmetic calculation to the search, but still depends on the LLM proposing useful actions. Applying a similar evaluator to larger or open-ended reasoning tasks would be more difficult.')
+    h('Checking saved results')
+    p(f"I used analyze_v3.py to check the source hashes, all 30 trial records, final answers, API usage and summary statistics. It also checked {a['tool_value_records_rechecked']} saved tool evaluations and the operands used in intermediate calculations. File checksums are recorded in import_manifest.json. This analysis uses saved responses and makes no API calls. Its later diagnostic calculations are excluded from the recorded baseline runtime.")
     page()
 
     h('8. Released-log audit and earlier experiments')
@@ -161,30 +161,32 @@ def main():
         ['V2 live run: raw / format policy','0/9 versus 0/9 on indices 900-902; width 1. Parseability improved, but no valid solution was obtained. Not pooled with V3.'],
         ['V3 live run: LLM / exact-tool evaluator','9/15 versus 11/15 on indices 903-907; width 3. Controlled evaluator ablation under the shared V3 setup.'],
     ],[5.0,11.6])
-    p(f"The interrupted V1 pilot remains in preliminary_v1. It saved three task outcomes plus one interrupted task without a success score. Its logs contain {pilot['calls']} completed responses and {pilot['prompt_tokens']+pilot['completion_tokens']:,} reported tokens. Only {pilot['recognized_value_labels']} of {pilot['value_calls']} value responses ended in an accepted label; {pilot['blank_lines']} of {pilot['proposal_lines']} proposal lines were blank. These observations motivated later interface changes, but are not replacements for V3 measurements.")
-    h('9. Debug diary')
-    table(['Blocker','Action and evidence'],[
-        ['Colab Python 3.13: standard venv failed','Created the existing environment with pinned virtualenv 20.35.4 and bundled pip; recorded the actual installed packages.'],
-        ['Legacy OpenAI SDK and backend names','Added a logged modern DeepSeek transport; kept upstream user templates, task/data and search source files intact.'],
-        ['Verbose outputs and fragile newline parsing','Retained V1/V2 failures. V3 shares bounded validated operation lines and permits brief evaluator reasoning in both arms.'],
-        ['Wrong value judgments and width-one lock-in','V3 uses width 3 in both arms; only the between-arm evaluator changes. Its exact tool is explicitly declared as an oracle.'],
-        ['Unclear long-running Colab output','Streamed child output through the notebook with a 15-second heartbeat. Per-instance rows and raw logs are saved incrementally.'],
-        ['Unsafe model expressions / hidden retries','Used AST and exact fractions before the authors\' checker. Counted physical attempts; preserved errors and start markers to prevent silent replacement of interrupted runs.'],
+    p(f"The interrupted V1 pilot is saved in preliminary_v1. It contains three task outcomes and one interrupted task without a success score. Its logs contain {pilot['calls']} completed responses and {pilot['prompt_tokens']+pilot['completion_tokens']:,} reported tokens. Only {pilot['recognized_value_labels']} of {pilot['value_calls']} value responses ended in a recognized label, and {pilot['blank_lines']} of {pilot['proposal_lines']} proposal lines were blank. I used these failures to revise the output handling in later experiments.")
+    h('9. Implementation issues')
+    table(['Problem','What I changed'],[
+        ['Standard venv failed on Colab Python 3.13','I installed virtualenv 20.35.4 and created an isolated environment using its bundled pip.'],
+        ['Outdated API client and model names','I updated the client for DeepSeek and saved the requests, responses and token usage.'],
+        ['Verbose outputs did not match the expected format','I validated the proposed operations and limited their number. Both V3 versions allow brief reasoning before the value label.'],
+        ['Incorrect evaluations with search width 1','I used width 3 in both V3 groups and compared LLM scores with exact arithmetic evaluation.'],
+        ['Colab ran for a long time without visible output','I streamed output into the notebook and added progress messages every 15 seconds. Results are saved after each instance.'],
+        ['Checking expressions and counting API usage','I checked expression syntax and exact arithmetic before the authors\' checker, and recorded every API attempt, including errors.'],
     ],[5.0,11.6])
-    p('V2-to-V3 changes include new tasks, width, validation, prompts and evaluator setup, so a V2/V3 accuracy difference is not an isolated tool-effect estimate. The controlled comparison is between the two V3 arms. All earlier files and reviewable change commits are retained.','ReportSmall')
+    p('V3 changed the tasks, width, validation and prompts as well as the evaluator setup. I therefore report V2 separately and compare the two V3 groups to measure the evaluator change. Earlier logs and code versions are available in the repository.','ReportSmall')
     page()
 
     h('10. Conclusions and limitations')
-    p(f"I recalculated the released-log count of 69/100 and observed correct model-generated multi-step solutions in fresh DeepSeek runs. Under the common V3 setup, LLM evaluation scored {pct(b['mean_success_rate'])} and exact-tool evaluation scored {pct(m['mean_success_rate'])}. The observed difference was +{a['accuracy_difference_percentage_points']:.1f} percentage points, with substantially fewer API calls and tokens in the tool arm.")
-    p('The claim is limited to this five-puzzle exploratory experiment. The improvement was not consistent across trials, the baseline varied from 0% to 100%, and index 906 regressed. Three repeats do not establish statistical significance or fifteen independent tasks. A larger preregistered held-out sample and more trials would be needed for a reliable accuracy comparison. The API alias and provider-side randomness further limit exact repeatability.')
-    p('The useful lesson is that parsing, numerical-state interpretation, proposal coverage and evaluation quality can each determine whether an agent search succeeds. Exact tools can remove a class of scoring errors while leaving generation failures untouched. A future study could compare identical frozen candidate sets or improve proposal coverage on additional held-out tasks. Those are future experiments, not measured results added to this report.')
-    h('11. Reproduction artifacts')
-    p('Code: reproduce_v3.py, v3_arithmetic.py and v3_config.json. The original V2 harness is retained. Source and measured code hashes appear in metadata.json; raw API messages and tool calls are under traces/. results.jsonl/csv preserve all outcomes. trial_summary.csv, by_puzzle.csv and analysis.json expose the accuracy calculations. The original uploaded ZIP is fingerprinted in import_manifest.json. Git history preserves the staged changes and earlier versions; the current submission retains the final report and supporting experiment records.')
-    p('Offline audit: python analyze_v3.py --run-dir measured_results/tool_evaluator_v3. Report: python make_report_v3.py --name "Lu Yankai" --student-id "1155252187". Both use saved records and make no model calls. For new inference, follow README.md: run the separate end-to-end toy probe, then the fixed main experiment in a new experiment_runs/tool_evaluator_v3 directory. Do not overwrite the measured_results copy.','ReportSmall')
-    p('The toy probe starts from 1 2 3 4 without a completed trace. It solved the case in 10 API attempts. This is an engineering check excluded from benchmark accuracy. Credentials remain in environment variables or Colab Secrets; no API key is required for inspecting saved measurements.','ReportSmall')
-    h('12. Submission links and references')
-    p('GitHub: '+(args.github_url or 'Pending - actual repository URL has not yet been supplied.'))
-    p('Presentation: '+(args.presentation_url or 'Pending - actual Zoom recording URL has not yet been supplied.'))
+    p(f"Rechecking the authors' saved outputs gave 69/100 successes. In my DeepSeek experiment, the LLM evaluator scored {pct(b['mean_success_rate'])} and the exact evaluator scored {pct(m['mean_success_rate'])}. Both used the same V3 search settings. The exact evaluator's average accuracy was {a['accuracy_difference_percentage_points']:.1f} percentage points higher and it used fewer API calls and tokens.")
+    p('The sample is small, the improvement varied across trials, and the exact evaluator performed worse on index 906. The 15 runs per group repeat five puzzles, so they should not be treated as 15 independent tasks. A larger set chosen before the experiment and more repeats would give a stronger accuracy comparison. Changes to the API model and provider-side randomness may also affect future runs.')
+    p('The main problem was not always generating a correct-looking value label. The evaluator sometimes misread the remaining numbers, while other runs failed because no useful first step was proposed. Exact arithmetic fixed the first problem but could not fix the second. As a next step, I would compare evaluators on identical saved candidate sets, then study proposal coverage on more puzzles.')
+    h('11. Code and data')
+    p('The main files are reproduce_v3.py, v3_arithmetic.py and v3_config.json. Measurements are in measured_results/tool_evaluator_v3/. The traces/ directory contains prompts, model responses and tool calls. results.jsonl/csv contains each run, while trial_summary.csv, by_puzzle.csv and analysis.json contain the summaries. metadata.json records the settings and source hashes. Earlier experiments are in preliminary_v1/ and measured_results/format_policy_v2/.')
+    p('Run python analyze_v3.py --run-dir measured_results/tool_evaluator_v3 to recalculate the results without an API key. Run python make_report_v3.py to generate this report. README.md gives the installation and Colab steps for a new experiment. New runs are saved separately under experiment_runs/.','ReportSmall')
+    p('The separate probe solved 1 2 3 4 in 10 API calls. It checks the full search before the main experiment and is excluded from the reported accuracy. The DeepSeek key is read from an environment variable or Colab Secrets.','ReportSmall')
+    h('12. Links and references')
+    if args.github_url:
+        p('GitHub: '+args.github_url)
+    if args.presentation_url:
+        p('Zoom recording: '+args.presentation_url)
     p('Yao et al. (2023). Tree of Thoughts: Deliberate Problem Solving with Large Language Models. https://arxiv.org/abs/2305.10601','ReportSmall')
     p('Authors\' repository, released logs and original/reproduced score note: https://github.com/princeton-nlp/tree-of-thought-llm (pinned commit in section 2).','ReportSmall')
     p('DeepSeek API model / thinking documentation: https://api-docs.deepseek.com/quick_start/pricing/ ; https://api-docs.deepseek.com/guides/thinking_mode/ . Actual requested/resolved names and usage are in the run logs.','ReportSmall')
