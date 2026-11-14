@@ -1,0 +1,1 @@
+functools.partial(<bound method BoundaryAdapter.gpt of <__main__.BoundaryAdapter object at 0x7cd858692d50>>, model='deepseek-flash', temperature=0.7)

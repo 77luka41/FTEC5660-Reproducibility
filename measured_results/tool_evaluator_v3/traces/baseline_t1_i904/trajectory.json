@@ -1,0 +1,227 @@
+{
+  "row": {
+    "evaluator": "llm",
+    "puzzle": "6 7 8 9",
+    "status": "completed",
+    "error_type": "",
+    "success_any": 1,
+    "success_top1": 1,
+    "upstream_success_any": 1,
+    "seconds": 49.993133944000874,
+    "completion_tokens": 2698,
+    "prompt_tokens": 25317,
+    "total_tokens": 28015,
+    "api_calls": 56,
+    "retry_calls": 0,
+    "cost": null,
+    "tool_calls": 0,
+    "tool_nodes": 0,
+    "tool_cache_hits": 0,
+    "tool_seconds": 0.0,
+    "reachability_calls": 0,
+    "final_expression_tool_checks": 0,
+    "generated_operation_lines": 49,
+    "invalid_operation_lines": 0,
+    "accepted_operation_lines": 48,
+    "overflow_operation_lines": 0,
+    "final_generation_calls": 2
+  },
+  "outputs": [
+    "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: 6 * (8 / (9 - 7)) = 24\n",
+    "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 * 8 = 24 (left: 24)\nAnswer: (6 / (9 - 7)) * 8 = 24\n"
+  ],
+  "evaluation": {
+    "strict": [
+      {
+        "valid": true,
+        "safe_grammar": true,
+        "expression": "6 * (8 / (9 - 7))"
+      },
+      {
+        "valid": true,
+        "safe_grammar": true,
+        "expression": "(6 / (9 - 7)) * 8"
+      }
+    ],
+    "upstream_rewards": [
+      1,
+      1
+    ],
+    "success_any": 1,
+    "success_top1": 1,
+    "upstream_success_any": 1
+  },
+  "trace": {
+    "steps": [
+      {
+        "step": 0,
+        "x": "6 7 8 9",
+        "ys": [
+          ""
+        ],
+        "new_ys": [
+          "6 + 7 = 13 (left: 8 9 13)\n",
+          "7 + 8 = 15 (left: 6 9 15)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n",
+          "9 - 6 = 3 (left: 3 7 8)\n",
+          "8 - 6 = 2 (left: 2 7 9)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n",
+          "6 * 7 = 42 (left: 8 9 42)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          1.0,
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          1.0
+        ],
+        "select_new_ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n"
+        ]
+      },
+      {
+        "step": 1,
+        "x": "6 7 8 9",
+        "ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n"
+        ],
+        "new_ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n2 + 6 = 8 (left: 8 8)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 - 2 = 4 (left: 4 8)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n2 * 6 = 12 (left: 8 12)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n8 - 6 = 2 (left: 2 2)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n8 + 2 = 10 (left: 6 10)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n8 - 2 = 6 (left: 6 6)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n6 + 7 = 13 (left: 13 17)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n17 - 7 = 10 (left: 6 10)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n7 * 6 = 42 (left: 17 42)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n17 / 6 = 17/6 (left: 7 17/6)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n17 - 6 = 11 (left: 7 11)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n7 - 6 = 1 (left: 1 17)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n17 + 6 = 23 (left: 7 23)\n",
+          "8 + 9 = 17 (left: 6 7 17)\n17 + 7 = 24 (left: 6 24)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n7 - 6 = 1 (left: 1 72)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 * 7 = 42 (left: 42 72)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n72 / 6 = 12 (left: 7 12)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n72 / 7 = 72/7 (left: 6 72/7)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n72 - 7 = 65 (left: 6 65)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n72 - 6 = 66 (left: 7 66)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n72 + 6 = 78 (left: 7 78)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          20.0,
+          20.0,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n"
+        ]
+      },
+      {
+        "step": 2,
+        "x": "6 7 8 9",
+        "ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n"
+        ],
+        "new_ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n4 + 6 = 10 (left: 10)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n6 - 4 = 2 (left: 2)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n4 * 6 = 24 (left: 24)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n6 / 4 = 3/2 (left: 3/2)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 + 8 = 11 (left: 11)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n8 - 3 = 5 (left: 5)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 * 8 = 24 (left: 24)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n8 / 3 = 8/3 (left: 8/3)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 / 8 = 3/8 (left: 3/8)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n13 + 72 = 85 (left: 85)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n72 - 13 = 59 (left: 59)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n13 * 72 = 936 (left: 936)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n72 / 13 = 72/13 (left: 72/13)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n13 / 72 = 13/72 (left: 13/72)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n13 - 72 = -59 (left: -59)\n",
+          "8 * 9 = 72 (left: 6 7 72)\n6 + 7 = 13 (left: 13 72)\n72 + 13 = 85 (left: 85)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          0.001,
+          0.001,
+          20.0,
+          20.0,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n4 * 6 = 24 (left: 24)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 * 8 = 24 (left: 24)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n8 / 3 = 8/3 (left: 8/3)\n"
+        ]
+      },
+      {
+        "step": 3,
+        "x": "6 7 8 9",
+        "ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n4 * 6 = 24 (left: 24)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 * 8 = 24 (left: 24)\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n8 / 3 = 8/3 (left: 8/3)\n"
+        ],
+        "new_ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: 6 * (8 / (9 - 7)) = 24\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 * 8 = 24 (left: 24)\nAnswer: (6 / (9 - 7)) * 8 = 24\n"
+        ],
+        "values": [
+          20.0,
+          20.0
+        ],
+        "select_new_ys": [
+          "9 - 7 = 2 (left: 2 6 8)\n8 / 2 = 4 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: 6 * (8 / (9 - 7)) = 24\n",
+          "9 - 7 = 2 (left: 2 6 8)\n6 / 2 = 3 (left: 3 8)\n3 * 8 = 24 (left: 24)\nAnswer: (6 / (9 - 7)) * 8 = 24\n"
+        ]
+      }
+    ]
+  }
+}

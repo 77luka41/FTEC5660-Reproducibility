@@ -1,0 +1,239 @@
+{
+  "row": {
+    "evaluator": "exact_reachability_tool",
+    "puzzle": "1 2 3 4",
+    "status": "completed",
+    "error_type": "",
+    "success_any": 1,
+    "success_top1": 1,
+    "upstream_success_any": 1,
+    "seconds": 11.407956244000161,
+    "completion_tokens": 1111,
+    "prompt_tokens": 3728,
+    "total_tokens": 4839,
+    "api_calls": 10,
+    "retry_calls": 0,
+    "cost": null,
+    "tool_calls": 52,
+    "tool_nodes": 189,
+    "tool_cache_hits": 290,
+    "tool_seconds": 0.0025513670007057954,
+    "reachability_calls": 49,
+    "final_expression_tool_checks": 3,
+    "generated_operation_lines": 67,
+    "invalid_operation_lines": 2,
+    "accepted_operation_lines": 49,
+    "overflow_operation_lines": 16,
+    "final_generation_calls": 3
+  },
+  "outputs": [
+    "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: 4 * (3 + (1 + 2)) = 24\n",
+    "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 * 4 = 24 (left: 24)\nAnswer: (1 + 2 + 3) * 4 = 24\n",
+    "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: (1 + 3) * (2 + 4) = 24\n"
+  ],
+  "evaluation": {
+    "strict": [
+      {
+        "valid": true,
+        "safe_grammar": true,
+        "expression": "4 * (3 + (1 + 2))"
+      },
+      {
+        "valid": true,
+        "safe_grammar": true,
+        "expression": "(1 + 2 + 3) * 4"
+      },
+      {
+        "valid": true,
+        "safe_grammar": true,
+        "expression": "(1 + 3) * (2 + 4)"
+      }
+    ],
+    "upstream_rewards": [
+      1,
+      1,
+      1
+    ],
+    "success_any": 1,
+    "success_top1": 1,
+    "upstream_success_any": 1
+  },
+  "trace": {
+    "steps": [
+      {
+        "step": 0,
+        "x": "1 2 3 4",
+        "ys": [
+          ""
+        ],
+        "new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n",
+          "1 + 4 = 5 (left: 2 3 5)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n",
+          "2 + 4 = 6 (left: 1 3 6)\n",
+          "3 + 4 = 7 (left: 1 2 7)\n",
+          "2 - 1 = 1 (left: 1 3 4)\n",
+          "3 - 1 = 2 (left: 2 2 4)\n"
+        ],
+        "values": [
+          20.0,
+          20.0,
+          0.001,
+          20.0,
+          20.0,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n"
+        ]
+      },
+      {
+        "step": 1,
+        "x": "1 2 3 4",
+        "ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n"
+        ],
+        "new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n4 - 3 = 1 (left: 1 3)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n4 + 3 = 7 (left: 3 7)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n4 * 3 = 12 (left: 3 12)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n4 / 3 = 4/3 (left: 3 4/3)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 / 4 = 3/4 (left: 3 3/4)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 - 4 = -1 (left: -1 3)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n4 / 2 = 2 (left: 2 4)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n4 - 2 = 2 (left: 2 4)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n4 + 4 = 8 (left: 2 8)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n4 * 2 = 8 (left: 4 8)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n4 * 4 = 16 (left: 2 16)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n4 / 4 = 1 (left: 1 2)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 * 4 = 8 (left: 4 8)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n4 - 1 = 3 (left: 3 5)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n1 + 4 = 5 (left: 5 5)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n5 - 1 = 4 (left: 4 4)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n1 * 5 = 5 (left: 4 5)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n5 / 1 = 5 (left: 4 5)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n5 - 4 = 1 (left: 1 1)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n4 + 5 = 9 (left: 1 9)\n",
+          "2 + 3 = 5 (left: 1 4 5)\n1 * 4 = 4 (left: 4 5)\n"
+        ],
+        "values": [
+          20.0,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n"
+        ]
+      },
+      {
+        "step": 2,
+        "x": "1 2 3 4",
+        "ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n"
+        ],
+        "new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 + 6 = 10 (left: 10)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 - 4 = 2 (left: 2)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 - 6 = -2 (left: -2)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 + 4 = 10 (left: 10)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 * 4 = 24 (left: 24)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 + 6 = 10 (left: 10)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n6 - 4 = 2 (left: 2)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n6 / 4 = 3/2 (left: 3/2)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 / 6 = 2/3 (left: 2/3)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 - 6 = -2 (left: -2)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n9 - 4 = 5 (left: 5)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n4 + 9 = 13 (left: 13)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n4 * 9 = 36 (left: 36)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n9 / 4 = 9/4 (left: 9/4)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 * 3 = 9 (left: 4 9)\n4 / 9 = 4/9 (left: 4/9)\n"
+        ],
+        "values": [
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          0.001,
+          20.0,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "select_new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 * 4 = 24 (left: 24)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\n"
+        ]
+      },
+      {
+        "step": 3,
+        "x": "1 2 3 4",
+        "ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 * 4 = 24 (left: 24)\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\n"
+        ],
+        "new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: 4 * (3 + (1 + 2)) = 24\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 * 4 = 24 (left: 24)\nAnswer: (1 + 2 + 3) * 4 = 24\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: (1 + 3) * (2 + 4) = 24\n"
+        ],
+        "values": [
+          20.0,
+          20.0,
+          20.0
+        ],
+        "select_new_ys": [
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: 4 * (3 + (1 + 2)) = 24\n",
+          "1 + 2 = 3 (left: 3 3 4)\n3 + 3 = 6 (left: 4 6)\n6 * 4 = 24 (left: 24)\nAnswer: (1 + 2 + 3) * 4 = 24\n",
+          "1 + 3 = 4 (left: 2 4 4)\n2 + 4 = 6 (left: 4 6)\n4 * 6 = 24 (left: 24)\nAnswer: (1 + 3) * (2 + 4) = 24\n"
+        ]
+      }
+    ]
+  }
+}
