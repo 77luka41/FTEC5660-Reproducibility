@@ -28,21 +28,31 @@ The exact tool is an oracle for a tiny arithmetic subproblem. This measures a hy
 - [Per-trial results](measured_results/tool_evaluator_v3/trial_summary.csv)
 - [Per-puzzle results](measured_results/tool_evaluator_v3/by_puzzle.csv)
 - [Offline audit](measured_results/tool_evaluator_v3/analysis.json)
-- [English recording script](presentation_script_en.md)
 
 Submission repository: https://github.com/77luka41/FTEC5660-Reproducibility
 
-Actual Zoom recording link: pending. The script is not a recording.
+Zoom recording: pending.
 
 ## Source and changes
 
-Original project: [princeton-nlp/tree-of-thought-llm](https://github.com/princeton-nlp/tree-of-thought-llm), [paper](https://arxiv.org/abs/2305.10601). Pinned commit: `8050e67d0e3a0fddc424d7fa5801538722a4c4cc`. The MIT license and original [README](README.upstream.md) are retained.
+Original project: [princeton-nlp/tree-of-thought-llm](https://github.com/princeton-nlp/tree-of-thought-llm), [paper](https://arxiv.org/abs/2305.10601). Pinned commit: `8050e67d0e3a0fddc424d7fa5801538722a4c4cc`. The authors' source package and MIT license are retained; the [original documentation](https://github.com/princeton-nlp/tree-of-thought-llm/tree/8050e67d0e3a0fddc424d7fa5801538722a4c4cc) and full Git history identify the upstream version.
 
 The search loop, task, original user templates and data files are protected by hashes. V3 uses explicit runtime hooks around proposal/evaluation boundaries; byte-identical source files do not mean the whole pipeline is unmodified.
 
 Both arms share width 3, up to 8 validated proposals per parent, one value sample, common system-format instructions, terminal handling and resource limits. Only the evaluator changes between arms. Invalid model actions are rejected and logged, not repaired. The exact evaluator returns reachability and scores, never an expression. Final expressions come from the LLM and are independently checked with AST/exact fractions and the authors' safe evaluator.
 
-See [the protocol and Colab instructions](V3_EXPERIMENT_ZH.md). The protocol was fixed before V3 inference. Earlier V1/V2 failures on different tasks informed its design and remain in the repository.
+The protocol below and `v3_config.json` describe the settings fixed before V3 inference. Earlier V1/V2 failures on different tasks informed its design and remain in the repository.
+
+## Evaluation protocol
+
+- Indices 903-907 were fixed before V3 inference and had not been run in V1/V2. Each arm runs these five puzzles in three trials. The 15 outcomes per arm are repeats of five distinct tasks.
+- Primary accuracy is success-any among at most three retained final expressions. An expression must use the original four numbers exactly once and equal 24 using only +, -, * and /. Top-1 accuracy is also reported.
+- Trial accuracy is computed over five puzzles; the mean, sample variance and sample standard deviation are computed over three trial rates.
+- Both arms use width 3, at most eight valid proposals per parent and one value sample. Invalid arithmetic is rejected and logged without repair. A single remaining non-24 value ends a branch; a value numerically equal to 24 triggers an LLM-generated final expression.
+- The baseline uses the authors' LLM value routine with brief reasoning allowed before an exact final label. The modified arm uses exhaustive reachability with exact fractions over one to three remaining values. It returns reachability and scores, not an answer.
+- Arms alternate execution order and reset value caches between instances. Tool memoization is scoped to one instance. Python/NumPy seeds do not control provider decoding.
+- Each instance permits at most 80 physical API attempts or 60,000 already-reported tokens. One response can cross the token threshold. Errors and budget failures stay in the denominator; interrupted runs are not silently replaced.
+- V3 also changes shared adapters and search settings relative to V2. Only the within-V3 evaluator comparison isolates the intended factor. V1/V2 are not pooled with V3 or used to claim a cross-version causal gain.
 
 ## Install
 
@@ -54,7 +64,28 @@ source .venv/bin/activate
 python -m pip install -r requirements-colab.txt
 ```
 
-For Colab, `colab_environment_setup.py` uses pinned virtualenv 20.35.4 with bundled pip when standard venv/ensurepip fails. Reuse an existing installed environment. CPU is sufficient; no model training is involved. Use `requirements-colab.txt`, not the legacy upstream dependency file.
+CPU is sufficient; no model training is involved. The scripts load the retained source package directly, so a separate package installation is not required.
+
+### Google Colab
+
+Use a CPU runtime. Clone the repository in a notebook cell:
+
+```python
+!git clone https://github.com/77luka41/FTEC5660-Reproducibility.git /content/FTEC5660-Reproducibility
+%cd /content/FTEC5660-Reproducibility
+%run colab_environment_setup.py
+```
+
+The setup uses pinned virtualenv 20.35.4 with bundled pip when standard venv/ensurepip is unavailable. It installs `requirements-colab.txt` into `/content/ftec5660-repro-env`. Skip setup if that environment is already installed.
+
+Inspect the saved experiment without a key:
+
+```python
+import subprocess
+PY = '/content/ftec5660-repro-env/bin/python'
+subprocess.run([PY, 'analyze_v3.py', '--run-dir',
+                'measured_results/tool_evaluator_v3'], check=True)
+```
 
 ## Inspect results without an API key
 
@@ -77,14 +108,37 @@ python reproduce_v3.py --resume
 
 Default output: `experiment_runs/tool_evaluator_v3/`. The separate end-to-end probe uses `1 2 3 4`, with no supplied completed trace. It is excluded from accuracy. The main run contains 30 instances, each capped at 80 physical attempts or 60,000 already-reported tokens; one response can cross the token threshold. All failures count in the denominator. Interrupted instances cannot be silently replaced. Seeds control Python/NumPy only, not provider decoding.
 
-The older FTEC5660_Reproducibility_Colab.ipynb is retained for V2 history; follow V3_EXPERIMENT_ZH.md for the current experiment.
+For fresh inference in Colab, add a Secret named `DEEPSEEK_API_KEY` and enable notebook access. Run the separate toy probe first:
 
-For progress in Colab, use `run_v3_with_progress.run_v3(PY, ROOT, V3_DIR)` as shown in the protocol. It streams output and prints a heartbeat every 15 seconds. Fresh inference uses paid API calls; the saved experiment can be inspected offline.
+```python
+from google.colab import userdata
+from pathlib import Path
+import os, subprocess
+from run_v3_with_progress import run_v3
+
+os.environ['DEEPSEEK_API_KEY'] = userdata.get('DEEPSEEK_API_KEY')
+ROOT = Path('/content/FTEC5660-Reproducibility')
+PY = '/content/ftec5660-repro-env/bin/python'
+V3_DIR = ROOT / 'experiment_runs/tool_evaluator_v3'
+subprocess.run([PY, 'reproduce_v3.py', '--preflight',
+                '--output', str(V3_DIR)], cwd=ROOT, check=True)
+run_v3(PY, ROOT, V3_DIR, probe=True)
+```
+
+The probe starts from `1 2 3 4` without a supplied completed trace. After confirming `end_to_end_probe/probe_result.json` has `passed: true`, start the main experiment:
+
+```python
+run_v3(PY, ROOT, V3_DIR)
+```
+
+The wrapper streams output and prints a heartbeat every 15 seconds. Fresh inference uses API calls; saved measurements can be inspected offline. To preserve a new run separately, choose a new output directory rather than overwrite `measured_results/` or replace a previous incomplete run.
 
 ## Files and earlier experiments
 
 `measured_results/tool_evaluator_v3/` contains the original Colab files, full prompts/outputs/tool calls, the audit and report. `import_manifest.json` fingerprints the supplied ZIP and each original file. The main run used 862 attempts and 426,859 reported tokens; the separate probe used 10 attempts and 4,839 tokens. All 30 main runs completed without API or budget errors.
 
-`preliminary_v1/` retains an interrupted pilot. `measured_results/format_policy_v2/` retains the later 0/9 versus 0/9 formatting experiment and its earlier report. Neither is pooled with V3. The deterministic archive audit recalculates the authors' released 69/100; it is not fresh GPT-4 inference.
+`preliminary_v1/` retains the interrupted pilot logs and diagnostic measurements cited in the report. `measured_results/format_policy_v2/` retains the later 0/9 versus 0/9 formatting experiment, its raw records and audit. Neither is pooled with V3. The deterministic archive audit recalculates the authors' released 69/100; it is not fresh GPT-4 inference. `logs/game24/` retains the released author log needed for this audit.
 
-Local commits separate adapters, protocols, raw measurements, analysis and reports. `coursework_patches/` exports these reviewable changes from the pinned upstream version. Push to a personal coursework repository. Keep the original attribution and exclude secrets; `.gitignore` omits credentials, temporary environments and live experiment directories.
+`reproduce.py`, `reproduction_config.json`, `probe_output_policy.py`, `analyze_results.py` and `src/tot/format_policy.py` retain the V2 harness and evaluation policy, including shared utilities imported by V3. `run_with_progress.py` provides the streaming helper used by V3. `colab_environment_setup.py` installs the Colab environment. `make_report_v3.py` generates the final PDF from saved measurements. The remaining `src/tot/` modules preserve the authors' package.
+
+Git commits record adapters, protocols, measurements and analysis. Earlier versions remain available in history. `.gitignore` excludes credentials, temporary environments and live experiment directories.

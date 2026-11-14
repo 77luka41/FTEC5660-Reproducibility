@@ -179,8 +179,8 @@ def main():
     p('The claim is limited to this five-puzzle exploratory experiment. The improvement was not consistent across trials, the baseline varied from 0% to 100%, and index 906 regressed. Three repeats do not establish statistical significance or fifteen independent tasks. A larger preregistered held-out sample and more trials would be needed for a reliable accuracy comparison. The API alias and provider-side randomness further limit exact repeatability.')
     p('The useful lesson is that parsing, numerical-state interpretation, proposal coverage and evaluation quality can each determine whether an agent search succeeds. Exact tools can remove a class of scoring errors while leaving generation failures untouched. A future study could compare identical frozen candidate sets or improve proposal coverage on additional held-out tasks. Those are future experiments, not measured results added to this report.')
     h('11. Reproduction artifacts')
-    p('Code: reproduce_v3.py, v3_arithmetic.py and v3_config.json. The original V2 harness is retained. Source and measured code hashes appear in metadata.json; raw API messages and tool calls are under traces/. results.jsonl/csv preserve all outcomes. trial_summary.csv, by_puzzle.csv and analysis.json expose the accuracy calculations. The original uploaded ZIP is fingerprinted in import_manifest.json. The local history and exported coursework_patches preserve staged changes.')
-    p('Offline audit: python analyze_v3.py --run-dir measured_results/tool_evaluator_v3. Report: python make_report_v3.py --name "Lu Yankai" --student-id "1155252187". Both use saved records and make no model calls. For new inference, follow V3_EXPERIMENT_ZH.md: run the separate end-to-end toy probe, then the fixed main experiment in a new experiment_runs/tool_evaluator_v3 directory. Do not overwrite the measured_results copy.','ReportSmall')
+    p('Code: reproduce_v3.py, v3_arithmetic.py and v3_config.json. The original V2 harness is retained. Source and measured code hashes appear in metadata.json; raw API messages and tool calls are under traces/. results.jsonl/csv preserve all outcomes. trial_summary.csv, by_puzzle.csv and analysis.json expose the accuracy calculations. The original uploaded ZIP is fingerprinted in import_manifest.json. Git history preserves the staged changes and earlier versions; the current submission retains the final report and supporting experiment records.')
+    p('Offline audit: python analyze_v3.py --run-dir measured_results/tool_evaluator_v3. Report: python make_report_v3.py --name "Lu Yankai" --student-id "1155252187". Both use saved records and make no model calls. For new inference, follow README.md: run the separate end-to-end toy probe, then the fixed main experiment in a new experiment_runs/tool_evaluator_v3 directory. Do not overwrite the measured_results copy.','ReportSmall')
     p('The toy probe starts from 1 2 3 4 without a completed trace. It solved the case in 10 API attempts. This is an engineering check excluded from benchmark accuracy. Credentials remain in environment variables or Colab Secrets; no API key is required for inspecting saved measurements.','ReportSmall')
     h('12. Submission links and references')
     p('GitHub: '+(args.github_url or 'Pending - actual repository URL has not yet been supplied.'))
@@ -195,15 +195,7 @@ def main():
     doc=SimpleDocTemplate(str(pdf),pagesize=A4,leftMargin=1.8*cm,rightMargin=1.8*cm,
         topMargin=1.5*cm,bottomMargin=1.6*cm,title='Tree of Thoughts: Reproduction and Exact-Tool Evaluation',author=args.name)
     doc.build(story,onFirstPage=footer,onLaterPages=footer)
-    (run/'report.md').write_text('\n'.join(md),encoding='utf-8')
-    status=dict(live_experiment_complete=True,identity_complete=True,
-        github_url_complete=args.github_url.startswith('https://github.com/'),
-        presentation_link_complete=args.presentation_url.startswith('https://'),
-        note='The report and measurements are complete; link-completion fields record the remaining submission information.')
-    save_json=run/'submission_status.json'
-    save_json.write_text(json.dumps(status,indent=2)+'\n')
     print('Created:',pdf)
-    print('Status:',json.dumps(status))
 
 
 if __name__=='__main__':
